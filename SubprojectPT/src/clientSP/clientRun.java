@@ -3,6 +3,7 @@ package clientSP;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.sql.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,7 +23,6 @@ public class clientRun {
             // Lấy ra đối tượng từ xa từ registry
             interfaceProductManager productManager = (interfaceProductManager) registry.lookup("ProductManager");
 
-            // Hiển thị menu cho người dùng
             Scanner scanner = new Scanner(System.in);
             int choice;
             do {
@@ -31,6 +31,10 @@ public class clientRun {
                 System.out.println("2. Xem danh sách hóa đơn");
                 System.out.println("3. Xem danh sách khuyến mãi");
                 System.out.println("4. Xem danh sách nhà cung cấp");
+                System.out.println("5. Thêm sản phẩm");
+                System.out.println("6. Cập nhật sản phẩm");
+                System.out.println("7. Xóa sản phẩm");
+                System.out.println("8. Tìm kiếm sản phẩm");
                 System.out.println("0. Thoát");
                 System.out.print("Nhập lựa chọn của bạn: ");
                 choice = scanner.nextInt();
@@ -48,6 +52,18 @@ public class clientRun {
                         break;
                     case 4:
                         displaySuppliers(productManager);
+                        break;
+                    case 5:
+                        addProduct(scanner, productManager);
+                        break;
+                    case 6:
+                        updateProduct(scanner, productManager);
+                        break;
+                    case 7:
+                        deleteProduct(scanner, productManager);
+                        break;
+                    case 8:
+                        searchProduct(scanner, productManager);
                         break;
                     case 0:
                         System.out.println("Đã thoát");
@@ -117,4 +133,197 @@ public class clientRun {
             System.err.println("Error while getting suppliers: " + e.getMessage());
         }
     }
+ // Thêm sản phẩm
+    private static void addProduct(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.println("Nhập thông tin sản phẩm mới:");
+            System.out.print("ID sản phẩm: ");
+            String productID = scanner.next();
+            scanner.nextLine(); // Xóa bất kỳ ký tự newline còn lại trong bộ đệm
+            System.out.print("Tên sản phẩm: ");
+            String productName = scanner.nextLine(); // Sử dụng nextLine() để đọc dữ liệu kiểu String
+            System.out.print("Giá: ");
+            double price = scanner.nextDouble();
+            System.out.print("Số lượng: ");
+            int quantity = scanner.nextInt();
+            scanner.nextLine(); // Xóa bất kỳ ký tự newline còn lại trong bộ đệm
+            System.out.print("Mô tả: ");
+            String description = scanner.nextLine(); // Sử dụng nextLine() để đọc dữ liệu kiểu String
+            System.out.print("ID nhà cung cấp: ");
+            String supplierID = scanner.next();
+
+            Product newProduct = new Product(productID, productName, price, quantity, description, supplierID);
+            productManager.addProduct(newProduct);
+            System.out.println("Sản phẩm đã được thêm thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while adding product: " + e.getMessage());
+        }
+    }
+
+ // Xóa sản phẩm
+    private static void deleteProduct(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập ID sản phẩm cần xóa: ");
+            String productID = scanner.next();
+            productManager.deleteProduct(productID);
+            System.out.println("Sản phẩm có ID " + productID + " đã được xóa thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while deleting product: " + e.getMessage());
+        }
+    }
+
+ // Cập nhật thông tin sản phẩm
+    private static void updateProduct(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập ID sản phẩm cần cập nhật: ");
+            String productID = scanner.next();
+            System.out.println("Nhập thông tin mới cho sản phẩm:");
+            System.out.print("Tên sản phẩm: ");
+            String productName = scanner.next();
+            System.out.print("Giá: ");
+            double price = scanner.nextDouble();
+            System.out.print("Số lượng: ");
+            int quantity = scanner.nextInt();
+            System.out.print("Mô tả: ");
+            String description = scanner.next();
+            System.out.print("ID nhà cung cấp: ");
+            String supplierID = scanner.next();
+
+            Product updatedProduct = new Product(productID, productName, price, quantity, description, supplierID);
+            productManager.updateProduct(updatedProduct);
+            System.out.println("Sản phẩm có ID " + productID + " đã được cập nhật thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while updating product: " + e.getMessage());
+        }
+    }
+    // Tìm kiếm sản phẩm
+    private static void searchProduct(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập từ khóa tìm kiếm: ");
+            String keyword = scanner.next();
+            List<Product> searchResult = productManager.searchProducts(keyword);
+            if (searchResult.isEmpty()) {
+                System.out.println("Không tìm thấy sản phẩm nào phù hợp.");
+            } else {
+                System.out.println("Kết quả tìm kiếm:");
+                for (Product product : searchResult) {
+                    System.out.println(product);
+                }
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while searching product: " + e.getMessage());
+        }
+    }
+    //Tìm kiếm hóa đơn
+    private static void searchInvoice(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập từ khóa tìm kiếm: ");
+            String keyword = scanner.next();
+            List<Invoice> searchResult = productManager.searchInvoices(keyword);
+            if (searchResult.isEmpty()) {
+                System.out.println("Không tìm thấy hóa đơn nào phù hợp.");
+            } else {
+                System.out.println("Kết quả tìm kiếm:");
+                for (Invoice invoice : searchResult) {
+                    System.out.println(invoice);
+                }
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while searching invoice: " + e.getMessage());
+        }
+    }
+ // Thêm khuyến mãi
+    private static void addPromotion(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.println("Nhập thông tin khuyến mãi mới:");
+            // Không cần nhập ID khuyến mãi nếu đã xóa cột này khỏi cơ sở dữ liệu
+            //int promotionID = scanner.nextInt(); 
+
+            System.out.print("ID sản phẩm: ");
+            String productID = scanner.next();
+            System.out.print("ID nhà cung cấp: ");
+            String supplierID = scanner.next();
+            System.out.print("Tỷ lệ khuyến mãi: ");
+            double promotionRate = scanner.nextDouble();
+            System.out.print("Ngày bắt đầu (YYYY-MM-DD): ");
+            String startDateStr = scanner.next();
+            Date startDate = Date.valueOf(startDateStr);
+            System.out.print("Ngày kết thúc (YYYY-MM-DD): ");
+            String endDateStr = scanner.next();
+            Date endDate = Date.valueOf(endDateStr);
+
+            // Promotion ID không cần thiết nếu đã xóa cột này khỏi CSDL
+            //Promotion newPromotion = new Promotion(promotionID, productID, supplierID, promotionRate, startDate, endDate);
+            Promotion newPromotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+            productManager.addPromotion(newPromotion);
+            System.out.println("Khuyến mãi đã được thêm thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while adding promotion: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error: Invalid input format or data. Please try again.");
+            scanner.nextLine(); // Clear the buffer
+        }
+    }
+ // Cập nhật khuyến mãi
+    private static void updatePromotion(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.println("Nhập thông tin mới cho khuyến mãi:");
+            System.out.print("ID sản phẩm cần cập nhật: ");
+            String productID = scanner.next();
+            System.out.print("ID nhà cung cấp mới: ");
+            String newSupplierID = scanner.next();
+            System.out.print("Tỷ lệ khuyến mãi mới: ");
+            double newPromotionRate = scanner.nextDouble();
+            System.out.print("Ngày bắt đầu mới (YYYY-MM-DD): ");
+            String newStartDateStr = scanner.next();
+            Date newStartDate = Date.valueOf(newStartDateStr);
+            System.out.print("Ngày kết thúc mới (YYYY-MM-DD): ");
+            String newEndDateStr = scanner.next();
+            Date newEndDate = Date.valueOf(newEndDateStr);
+
+            Promotion updatedPromotion = new Promotion(productID, newSupplierID, newPromotionRate, newStartDate, newEndDate);
+            productManager.updatePromotion(updatedPromotion);
+            System.out.println("Khuyến mãi cho sản phẩm có ID " + productID + " đã được cập nhật thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while updating promotion: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error: Invalid input format or data. Please try again.");
+            scanner.nextLine(); // Clear the buffer
+        }
+    }
+ // Xóa khuyến mãi
+    private static void deletePromotion(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập ID sản phẩm cần xóa khuyến mãi: ");
+            String productID = scanner.next();
+            productManager.deletePromotion(productID);
+            System.out.println("Khuyến mãi cho sản phẩm có ID " + productID + " đã được xóa thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while deleting promotion: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error: Invalid input format or data. Please try again.");
+            scanner.nextLine(); // Clear the buffer
+        }
+    }
+
+
+    //Tìm kiếm khuyến mãi
+    private static void searchPromotion(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập từ khóa tìm kiếm: ");
+            String keyword = scanner.next();
+            List<Promotion> searchResult = productManager.searchPromotions(keyword);
+            if (searchResult.isEmpty()) {
+                System.out.println("Không tìm thấy khuyến mãi nào phù hợp.");
+            } else {
+                System.out.println("Kết quả tìm kiếm:");
+                for (Promotion promotion : searchResult) {
+                    System.out.println(promotion);
+                }
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while searching promotion: " + e.getMessage());
+        }
+    }
+
 }

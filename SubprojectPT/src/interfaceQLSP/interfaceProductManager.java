@@ -10,8 +10,30 @@ import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
 
 public interface interfaceProductManager extends Remote {
-    List<Product> getProducts() throws RemoteException;
-    List<Invoice> getInvoices() throws RemoteException;
-    List<Promotion> getPromotions() throws RemoteException;
-    List<SupplierSP> getSuppliers() throws RemoteException;
+	   // Chức năng Thêm
+    public void addProduct(Product product) throws RemoteException;
+    public void addPromotion(Promotion promotion) throws RemoteException;
+    public void addSupplier(SupplierSP supplier) throws RemoteException;
+    
+    // Chức năng Đọc
+    public List<Product> getProducts() throws RemoteException;
+    public List<Invoice> getInvoices() throws RemoteException;
+    public List<Promotion> getPromotions() throws RemoteException;
+    public List<SupplierSP> getSuppliers() throws RemoteException;
+    
+    // Chức năng Cập nhật
+    public void updateProduct(Product product) throws RemoteException;
+    public void updatePromotion(Promotion promotion) throws RemoteException;
+    public void updateSupplier(SupplierSP supplier) throws RemoteException;
+    
+    // Chức năng Xóa
+    public void deleteProduct(String productID) throws RemoteException;
+    public void deletePromotion(int promotionID) throws RemoteException;
+    public void deleteSupplier(String supplierID) throws RemoteException;
+    
+    // Chức năng Tìm kiếm
+    public List<Product> searchProducts(String keyword) throws RemoteException;
+    public List<Invoice> searchInvoices(String keyword) throws RemoteException;
+    public List<Promotion> searchPromotions(String keyword) throws RemoteException;
+    public List<SupplierSP> searchSuppliers(String keyword) throws RemoteException;
 }

@@ -1,4 +1,5 @@
 package objectQLSP;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -8,28 +9,18 @@ public class Promotion implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int promotionID;
-    private String productID;
+	private String productID;
     private String supplierID;
     private double promotionRate;
     private Date startDate;
     private Date endDate;
 
-    public Promotion(int promotionID, String productID, String supplierID, double promotionRate, Date startDate, Date endDate) {
-        this.promotionID = promotionID;
+    public Promotion(String productID, String supplierID, double promotionRate, Date startDate, Date endDate) {
         this.productID = productID;
         this.supplierID = supplierID;
         this.promotionRate = promotionRate;
         this.startDate = startDate;
         this.endDate = endDate;
-    }
-
-    public int getPromotionID() {
-        return promotionID;
-    }
-
-    public void setPromotionID(int promotionID) {
-        this.promotionID = promotionID;
     }
 
     public String getProductID() {
@@ -71,11 +62,11 @@ public class Promotion implements Serializable {
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
+
     @Override
     public String toString() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return "Promotion ID: " + promotionID +
-                ", Product ID: " + productID +
+        return "Product ID: " + productID +
                 ", Supplier ID: " + supplierID +
                 ", Promotion Rate: " + promotionRate +
                 ", Start Date: " + dateFormat.format(startDate) +
