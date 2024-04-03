@@ -4,7 +4,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Promotion implements Serializable {
-    private int promotionID;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int promotionID;
     private String productID;
     private String supplierID;
     private double promotionRate;

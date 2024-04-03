@@ -2,7 +2,11 @@ package objectQLSP;
 import java.io.Serializable;
 
 public class SupplierSP implements Serializable {
-    private String supplierID;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String supplierID;
     private String supplierName;
     private String address;
     private String phoneNumber;
