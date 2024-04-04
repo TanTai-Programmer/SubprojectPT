@@ -128,10 +128,11 @@ public class QueryProcessingDB {
             e.printStackTrace();
         }
     }
-    public void deletePromotion(int promotionID) {
-        String query = "DELETE FROM promotion WHERE promotionid = ?";
+    public void deletePromotion(String productID, String supplierID) {
+        String query = "DELETE FROM promotion WHERE productid = ? AND supplierid = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, promotionID);
+            statement.setString(1, productID);
+            statement.setString(2, supplierID);
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

@@ -69,10 +69,9 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
     }
 
     @Override
-    public void deletePromotion(int promotionID) throws RemoteException {
-        queryProcessor.deletePromotion(promotionID);
+    public void deletePromotion(String productID, String supplierID) throws RemoteException {
+        queryProcessor.deletePromotion(productID, supplierID);
     }
-
     @Override
     public void deleteSupplier(String supplierID) throws RemoteException {
         queryProcessor.deleteSupplier(supplierID);

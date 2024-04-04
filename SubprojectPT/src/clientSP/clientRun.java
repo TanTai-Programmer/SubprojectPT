@@ -35,10 +35,19 @@ public class clientRun {
                 System.out.println("6. Cập nhật sản phẩm");
                 System.out.println("7. Xóa sản phẩm");
                 System.out.println("8. Tìm kiếm sản phẩm");
+                System.out.println("9. Thêm khuyến mãi");
+                System.out.println("10. Cập nhật khuyến mãi");
+                System.out.println("11. Xóa khuyến mãi");
+                System.out.println("12. Tìm kiếm khuyến mãi");
+                System.out.println("13. Tìm kiếm hóa đơn");
+                System.out.println("14. Thêm nhà cung cấp");
+                System.out.println("15. Cập nhật nhà cung cấp");
+                System.out.println("16. Xóa nhà cung cấp");
                 System.out.println("0. Thoát");
+                
                 System.out.print("Nhập lựa chọn của bạn: ");
                 choice = scanner.nextInt();
-                
+
                 // Xử lý lựa chọn của người dùng
                 switch (choice) {
                     case 1:
@@ -65,6 +74,31 @@ public class clientRun {
                     case 8:
                         searchProduct(scanner, productManager);
                         break;
+                    case 9:
+                        addPromotion(scanner, productManager);
+                        break;
+                    case 10:
+                        updatePromotion(scanner, productManager);
+                        break;
+                    case 11:
+                        deletePromotion(scanner, productManager);
+                        break;
+                    case 12:
+                        searchPromotion(scanner, productManager);
+                        break;
+                    case 13:
+                        searchInvoice(scanner, productManager);
+                        break;
+                    case 14:
+                        addSupplier(scanner, productManager);
+                        break;
+                    case 15:
+                        updateSupplier(scanner, productManager);
+                        break;
+                    case 16:
+                        deleteSupplier(scanner, productManager);
+                        break;
+
                     case 0:
                         System.out.println("Đã thoát");
                         break;
@@ -73,8 +107,6 @@ public class clientRun {
                         break;
                 }
             } while (choice != 0);
-
-            scanner.close();
 
         } catch (Exception e) {
             System.err.println("Client exception: " + e.toString());
@@ -199,7 +231,7 @@ public class clientRun {
     // Tìm kiếm sản phẩm
     private static void searchProduct(Scanner scanner, interfaceProductManager productManager) {
         try {
-            System.out.print("Nhập từ khóa tìm kiếm: ");
+            System.out.print("Nhập từ khóa tìm kiếm sản phẩm: ");
             String keyword = scanner.next();
             List<Product> searchResult = productManager.searchProducts(keyword);
             if (searchResult.isEmpty()) {
@@ -217,7 +249,7 @@ public class clientRun {
     //Tìm kiếm hóa đơn
     private static void searchInvoice(Scanner scanner, interfaceProductManager productManager) {
         try {
-            System.out.print("Nhập từ khóa tìm kiếm: ");
+            System.out.print("Nhập từ khóa tìm kiếm hóa đơn: ");
             String keyword = scanner.next();
             List<Invoice> searchResult = productManager.searchInvoices(keyword);
             if (searchResult.isEmpty()) {
@@ -296,8 +328,10 @@ public class clientRun {
         try {
             System.out.print("Nhập ID sản phẩm cần xóa khuyến mãi: ");
             String productID = scanner.next();
-            productManager.deletePromotion(productID);
-            System.out.println("Khuyến mãi cho sản phẩm có ID " + productID + " đã được xóa thành công.");
+            System.out.print("Nhập ID nhà cung cấp của sản phẩm: ");
+            String supplierID = scanner.next();
+            productManager.deletePromotion(productID, supplierID);
+            System.out.println("Khuyến mãi cho sản phẩm có ID " + productID + " của nhà cung cấp " + supplierID + " đã được xóa thành công.");
         } catch (RemoteException e) {
             System.err.println("Error while deleting promotion: " + e.getMessage());
         } catch (Exception e) {
@@ -305,12 +339,10 @@ public class clientRun {
             scanner.nextLine(); // Clear the buffer
         }
     }
-
-
     //Tìm kiếm khuyến mãi
     private static void searchPromotion(Scanner scanner, interfaceProductManager productManager) {
         try {
-            System.out.print("Nhập từ khóa tìm kiếm: ");
+            System.out.print("Nhập từ khóa tìm kiếm khuyến mãi: ");
             String keyword = scanner.next();
             List<Promotion> searchResult = productManager.searchPromotions(keyword);
             if (searchResult.isEmpty()) {
@@ -325,5 +357,59 @@ public class clientRun {
             System.err.println("Error while searching promotion: " + e.getMessage());
         }
     }
+ // Thêm nhà cung cấp
+    private static void addSupplier(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.println("Nhập thông tin nhà cung cấp mới:");
+            System.out.print("ID nhà cung cấp: ");
+            String supplierID = scanner.next();
+            scanner.nextLine(); // Xóa bất kỳ ký tự newline còn lại trong bộ đệm
+            System.out.print("Tên nhà cung cấp: ");
+            String supplierName = scanner.nextLine(); // Sử dụng nextLine() để đọc dữ liệu kiểu String
+            System.out.print("Địa chỉ: ");
+            String address = scanner.nextLine(); // Sử dụng nextLine() để đọc dữ liệu kiểu String
+            System.out.print("Số điện thoại: ");
+            String phoneNumber = scanner.next();
 
+            SupplierSP newSupplier = new SupplierSP(supplierID, supplierName, address, phoneNumber);
+            productManager.addSupplier(newSupplier);
+            System.out.println("Nhà cung cấp đã được thêm thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while adding supplier: " + e.getMessage());
+        }
+    }
+
+    // Xóa nhà cung cấp
+    private static void deleteSupplier(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập ID nhà cung cấp cần xóa: ");
+            String supplierID = scanner.next();
+            productManager.deleteSupplier(supplierID);
+            System.out.println("Nhà cung cấp có ID " + supplierID + " đã được xóa thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while deleting supplier: " + e.getMessage());
+        }
+    }
+
+    // Cập nhật thông tin nhà cung cấp
+    private static void updateSupplier(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            System.out.print("Nhập ID nhà cung cấp cần cập nhật: ");
+            String supplierID = scanner.next();
+            System.out.println("Nhập thông tin mới cho nhà cung cấp:");
+            System.out.print("Tên nhà cung cấp: ");
+            String supplierName = scanner.next();
+            scanner.nextLine(); // Xóa bất kỳ ký tự newline còn lại trong bộ đệm
+            System.out.print("Địa chỉ: ");
+            String address = scanner.nextLine(); // Sử dụng nextLine() để đọc dữ liệu kiểu String
+            System.out.print("Số điện thoại: ");
+            String phoneNumber = scanner.next();
+
+            SupplierSP updatedSupplier = new SupplierSP(supplierID, supplierName, address, phoneNumber);
+            productManager.updateSupplier(updatedSupplier);
+            System.out.println("Nhà cung cấp có ID " + supplierID + " đã được cập nhật thành công.");
+        } catch (RemoteException e) {
+            System.err.println("Error while updating supplier: " + e.getMessage());
+        }
+    }
 }

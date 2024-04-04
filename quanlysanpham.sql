@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 03, 2024 lúc 04:50 PM
+-- Thời gian đã tạo: Th4 04, 2024 lúc 06:42 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -63,7 +63,8 @@ CREATE TABLE `product` (
 
 INSERT INTO `product` (`productid`, `productname`, `price`, `quantity`, `description`, `supplierid`) VALUES
 ('sp00001', 'Sản phẩm 1', 100.00, 50, 'Mô tả sản phẩm 1', 's00001'),
-('sp00002', 'Sản phẩm 2', 150.00, 30, 'Mô tả sản phẩm 2', 's00002');
+('sp00002', 'Sản phẩm 2', 150.00, 30, 'Mô tả sản phẩm 2', 's00002'),
+('sp00003', 'Kẹp tóc nữ', 130000.00, 200, 'Kẹp tóc màu hồng phù hợp cho các bạn nữ', 's00001');
 
 -- --------------------------------------------------------
 
@@ -72,7 +73,6 @@ INSERT INTO `product` (`productid`, `productname`, `price`, `quantity`, `descrip
 --
 
 CREATE TABLE `promotion` (
-  `promotionid` int(11) NOT NULL,
   `productid` varchar(10) DEFAULT NULL,
   `supplierid` varchar(10) DEFAULT NULL,
   `promotionrate` decimal(5,2) NOT NULL,
@@ -84,9 +84,9 @@ CREATE TABLE `promotion` (
 -- Đang đổ dữ liệu cho bảng `promotion`
 --
 
-INSERT INTO `promotion` (`promotionid`, `productid`, `supplierid`, `promotionrate`, `startdate`, `enddate`) VALUES
-(1, 'sp00001', 's00001', 0.10, '2024-04-03', '2024-04-10'),
-(2, 'sp00002', 's00002', 0.15, '2024-04-04', '2024-04-11');
+INSERT INTO `promotion` (`productid`, `supplierid`, `promotionrate`, `startdate`, `enddate`) VALUES
+('sp00001', 's00001', 0.10, '2024-04-03', '2024-04-10'),
+('sp00002', 's00002', 0.15, '2024-04-04', '2024-04-11');
 
 -- --------------------------------------------------------
 
@@ -125,12 +125,6 @@ ALTER TABLE `invoice`
 ALTER TABLE `product`
   ADD PRIMARY KEY (`productid`),
   ADD KEY `supplierid` (`supplierid`);
-
---
--- Chỉ mục cho bảng `promotion`
---
-ALTER TABLE `promotion`
-  ADD PRIMARY KEY (`promotionid`);
 
 --
 -- Chỉ mục cho bảng `supplier`
