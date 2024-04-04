@@ -1,6 +1,5 @@
 package objectQLSP;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Invoice implements Serializable {
@@ -8,40 +7,30 @@ public class Invoice implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int invoiceID;
-    private String productID;
-    private Date purchaseDate;
+	private String invoiceID;
+    private Date createDate;
     private double totalAmount;
 
-    public Invoice(int invoiceID, String productID, Date purchaseDate, double totalAmount) {
+    public Invoice(String invoiceID, Date createDate, double totalAmount) {
         this.invoiceID = invoiceID;
-        this.productID = productID;
-        this.purchaseDate = purchaseDate;
+        this.createDate = createDate;
         this.totalAmount = totalAmount;
     }
 
-    public int getInvoiceID() {
+    public String getInvoiceID() {
         return invoiceID;
     }
 
-    public void setInvoiceID(int invoiceID) {
+    public void setInvoiceID(String invoiceID) {
         this.invoiceID = invoiceID;
     }
 
-    public String getProductID() {
-        return productID;
+    public Date getCreateDate() {
+        return createDate;
     }
 
-    public void setProductID(String productID) {
-        this.productID = productID;
-    }
-
-    public Date getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(Date purchaseDate) {
-        this.purchaseDate = purchaseDate;
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
     public double getTotalAmount() {
@@ -51,12 +40,11 @@ public class Invoice implements Serializable {
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
     }
+
     @Override
     public String toString() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return "Invoice ID: " + invoiceID +
-                ", Product ID: " + productID +
-                ", Purchase Date: " + dateFormat.format(purchaseDate) +
+                ", Create Date: " + createDate +
                 ", Total Amount: " + totalAmount;
     }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import interfaceQLSP.interfaceProductManager;
-import objectQLSP.Invoice;
+import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
@@ -43,6 +43,7 @@ public class clientRun {
                 System.out.println("14. Thêm nhà cung cấp");
                 System.out.println("15. Cập nhật nhà cung cấp");
                 System.out.println("16. Xóa nhà cung cấp");
+                System.out.println("17. Tìm kiếm hóa đơn");
                 System.out.println("0. Thoát");
                 
                 System.out.print("Nhập lựa chọn của bạn: ");
@@ -54,7 +55,7 @@ public class clientRun {
                         displayProducts(productManager);
                         break;
                     case 2:
-                        displayInvoices(productManager);
+                    	displayInvoiceDetails(productManager);
                         break;
                     case 3:
                         displayPromotions(productManager);
@@ -86,9 +87,6 @@ public class clientRun {
                     case 12:
                         searchPromotion(scanner, productManager);
                         break;
-                    case 13:
-                        searchInvoice(scanner, productManager);
-                        break;
                     case 14:
                         addSupplier(scanner, productManager);
                         break;
@@ -98,7 +96,8 @@ public class clientRun {
                     case 16:
                         deleteSupplier(scanner, productManager);
                         break;
-
+                    case 17:
+                    	searchInvoiceDetail(scanner, productManager);
                     case 0:
                         System.out.println("Đã thoát");
                         break;
@@ -128,15 +127,16 @@ public class clientRun {
     }
 
     // Hiển thị danh sách hóa đơn
-    private static void displayInvoices(interfaceProductManager productManager) {
+ // Hiển thị danh sách hóa đơn
+    private static void displayInvoiceDetails(interfaceProductManager productManager) {
         try {
-            List<Invoice> invoices = productManager.getInvoices();
-            System.out.println("Danh sách hóa đơn:");
-            for (Invoice invoice : invoices) {
-                System.out.println(invoice);
+            List<InvoiceDetail> invoiceDetails = productManager.getInvoiceDetails();
+            System.out.println("Danh sách chi tiết hóa đơn:");
+            for (InvoiceDetail invoiceDetail : invoiceDetails) {
+                System.out.println(invoiceDetail);
             }
         } catch (RemoteException e) {
-            System.err.println("Error while getting invoices: " + e.getMessage());
+            System.err.println("Error while getting invoice details: " + e.getMessage());
         }
     }
 
@@ -246,24 +246,7 @@ public class clientRun {
             System.err.println("Error while searching product: " + e.getMessage());
         }
     }
-    //Tìm kiếm hóa đơn
-    private static void searchInvoice(Scanner scanner, interfaceProductManager productManager) {
-        try {
-            System.out.print("Nhập từ khóa tìm kiếm hóa đơn: ");
-            String keyword = scanner.next();
-            List<Invoice> searchResult = productManager.searchInvoices(keyword);
-            if (searchResult.isEmpty()) {
-                System.out.println("Không tìm thấy hóa đơn nào phù hợp.");
-            } else {
-                System.out.println("Kết quả tìm kiếm:");
-                for (Invoice invoice : searchResult) {
-                    System.out.println(invoice);
-                }
-            }
-        } catch (RemoteException e) {
-            System.err.println("Error while searching invoice: " + e.getMessage());
-        }
-    }
+    
  // Thêm khuyến mãi
     private static void addPromotion(Scanner scanner, interfaceProductManager productManager) {
         try {
@@ -412,4 +395,23 @@ public class clientRun {
             System.err.println("Error while updating supplier: " + e.getMessage());
         }
     }
+    private static void searchInvoiceDetail(Scanner scanner, interfaceProductManager productManager) {
+        System.out.print("Nhập mã hóa đơn cần tìm kiếm: ");
+        scanner.nextLine(); 
+        String invoiceID = scanner.nextLine();
+        try {
+            List<InvoiceDetail> invoiceDetails = productManager.searchInvoiceDetails(invoiceID);
+            if (invoiceDetails.isEmpty()) {
+                System.out.println("Không tìm thấy chi tiết hóa đơn với mã " + invoiceID);
+            } else {
+                System.out.println("Danh sách chi tiết hóa đơn với mã " + invoiceID + ":");
+                for (InvoiceDetail invoiceDetail : invoiceDetails) {
+                    System.out.println(invoiceDetail);
+                }
+            }
+        } catch (RemoteException e) {
+            System.err.println("Lỗi khi tìm kiếm chi tiết hóa đơn: " + e.getMessage());
+        }
+    }
+
 }

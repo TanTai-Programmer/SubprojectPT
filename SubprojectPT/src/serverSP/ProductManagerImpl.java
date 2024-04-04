@@ -7,7 +7,7 @@ import java.util.List;
 
 import databaseQLSP.DatabaseConnection;
 import interfaceQLSP.interfaceProductManager;
-import objectQLSP.Invoice;
+import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
@@ -82,12 +82,6 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
     public List<Product> searchProducts(String keyword) throws RemoteException {
         return queryProcessor.searchProducts(keyword);
     }
-
-    @Override
-    public List<Invoice> searchInvoices(String keyword) throws RemoteException {
-        return queryProcessor.searchInvoices(keyword);
-    }
-
     @Override
     public List<Promotion> searchPromotions(String keyword) throws RemoteException {
         return queryProcessor.searchPromotions(keyword);
@@ -105,8 +99,8 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
     }
 
     @Override
-    public List<Invoice> getInvoices() throws RemoteException {
-        return queryProcessor.getInvoices();
+    public List<InvoiceDetail> getInvoiceDetails() throws RemoteException {
+        return queryProcessor.getInvoiceDetails();
     }
 
     @Override
@@ -118,4 +112,10 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
     public List<SupplierSP> getSuppliers() throws RemoteException {
         return queryProcessor.getSuppliers();
     }
+
+	@Override
+	public List<InvoiceDetail> searchInvoiceDetails(String invoiceID) throws RemoteException {
+		return queryProcessor.searchInvoiceDetails(invoiceID);
+	}
+
 }

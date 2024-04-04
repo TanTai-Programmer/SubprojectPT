@@ -4,7 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
-import objectQLSP.Invoice;
+import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
@@ -14,10 +14,12 @@ public interface interfaceProductManager extends Remote {
     public void addProduct(Product product) throws RemoteException;
     public void addPromotion(Promotion promotion) throws RemoteException;
     public void addSupplier(SupplierSP supplier) throws RemoteException;
-    
+
     // Chức năng Đọc
     public List<Product> getProducts() throws RemoteException;
-    public List<Invoice> getInvoices() throws RemoteException;
+    
+    public List<InvoiceDetail> getInvoiceDetails() throws RemoteException;
+
     public List<Promotion> getPromotions() throws RemoteException;
     public List<SupplierSP> getSuppliers() throws RemoteException;
     
@@ -34,7 +36,7 @@ public interface interfaceProductManager extends Remote {
     
     // Chức năng Tìm kiếm
     public List<Product> searchProducts(String keyword) throws RemoteException;
-    public List<Invoice> searchInvoices(String keyword) throws RemoteException;
     public List<Promotion> searchPromotions(String keyword) throws RemoteException;
     public List<SupplierSP> searchSuppliers(String keyword) throws RemoteException;
+    List<InvoiceDetail> searchInvoiceDetails(String invoiceID) throws RemoteException;
 }

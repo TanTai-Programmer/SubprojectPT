@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import objectQLSP.Invoice;
+import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
@@ -60,19 +60,6 @@ public class QueryProcessingDB {
             e.printStackTrace();
         }
     }
-    public void addInvoice(Invoice invoice) {
-        String query = "INSERT INTO invoice (invoiceid, productid, purchasedate, totalamount) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, invoice.getInvoiceID());
-            statement.setString(2, invoice.getProductID());
-            statement.setDate(3, new java.sql.Date(invoice.getPurchaseDate().getTime()));
-            statement.setDouble(4, invoice.getTotalAmount());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     //Đối với chức năng cập nhật
     public void updateProduct(Product product) {
@@ -212,28 +199,6 @@ public class QueryProcessingDB {
         }
         return suppliers;
     }
-    public List<Invoice> searchInvoices(String keyword) {
-        List<Invoice> searchResult = new ArrayList<>();
-        String query = "SELECT * FROM invoice WHERE invoiceid = ? OR productid = ? OR purchasedate = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, keyword); // Bind parameter for invoiceid
-            statement.setString(2, keyword); // Bind parameter for productid
-            statement.setString(3, keyword); // Bind parameter for purchasedate
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                int invoiceID = resultSet.getInt("invoiceid");
-                String productID = resultSet.getString("productid");
-                Date purchaseDate = resultSet.getDate("purchasedate");
-                double totalAmount = resultSet.getDouble("totalamount");
-                // Tạo một đối tượng Invoice từ kết quả của truy vấn và thêm vào danh sách kết quả
-                searchResult.add(new Invoice(invoiceID, productID, purchaseDate, totalAmount));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return searchResult;
-    }
-
 
     //Đối với chức năng xem
     public List<Product> getProducts() {
@@ -253,23 +218,6 @@ public class QueryProcessingDB {
             e.printStackTrace();
         }
         return products;
-    }
-
-    public List<Invoice> getInvoices() {
-        List<Invoice> invoices = new ArrayList<>();
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM invoice")) {
-            while (resultSet.next()) {
-                int invoiceID = resultSet.getInt("invoiceid");
-                String productID = resultSet.getString("productid");
-                Date purchaseDate = resultSet.getDate("purchasedate");
-                double totalAmount = resultSet.getDouble("totalamount");
-                invoices.add(new Invoice(invoiceID, productID, purchaseDate, totalAmount));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return invoices;
     }
 
     public List<Promotion> getPromotions() {
@@ -309,4 +257,48 @@ public class QueryProcessingDB {
         }
         return suppliers;
     }
+    
+    //Xem danh sách hóa đơn theo mã hóa đơn
+    public List<InvoiceDetail> getInvoiceDetails() {
+        List<InvoiceDetail> invoiceDetails = new ArrayList<>();
+        String query = "SELECT * FROM invoice_detail ORDER BY invoiceid";
+        try (PreparedStatement statement = this.connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String invoiceID = resultSet.getString("invoiceid");
+                String productID = resultSet.getString("productid");
+                String productName = resultSet.getString("productname");
+                double promotionRate = resultSet.getDouble("promotionrate");
+                double price = resultSet.getDouble("price");
+                Date createDate = resultSet.getDate("createdate");
+                InvoiceDetail invoiceDetail = new InvoiceDetail(invoiceID, productID, productName, promotionRate, price, createDate);
+                invoiceDetails.add(invoiceDetail);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoiceDetails;
+    }
+    
+    public List<InvoiceDetail> searchInvoiceDetails(String invoiceID) {
+        List<InvoiceDetail> invoiceDetails = new ArrayList<>();
+        String query = "SELECT * FROM invoice_detail WHERE invoiceid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, invoiceID);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String productID = resultSet.getString("productid");
+                String productName = resultSet.getString("productname");
+                double promotionRate = resultSet.getDouble("promotionrate");
+                double price = resultSet.getDouble("price");
+                Date createDate = resultSet.getDate("createdate");
+                InvoiceDetail invoiceDetail = new InvoiceDetail(invoiceID, productID, productName, promotionRate, price, createDate);
+                invoiceDetails.add(invoiceDetail);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoiceDetails;
+    }
+
 }
