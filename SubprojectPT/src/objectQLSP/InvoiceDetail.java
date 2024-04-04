@@ -1,26 +1,27 @@
 package objectQLSP;
+
 import java.io.Serializable;
 import java.util.Date;
 
 public class InvoiceDetail implements Serializable {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private String invoiceID;
+    private static final long serialVersionUID = 1L;
+    
+    private String invoiceID;
     private String productID;
     private String productName;
     private double promotionRate;
     private double price;
     private Date createDate;
+    private int quantity; // Thêm số lượng sản phẩm
 
-    public InvoiceDetail(String invoiceID, String productID, String productName, double promotionRate, double price, Date createDate) {
+    public InvoiceDetail(String invoiceID, String productID, String productName, double promotionRate, double price, Date createDate, int quantity) {
         this.invoiceID = invoiceID;
         this.productID = productID;
         this.productName = productName;
         this.promotionRate = promotionRate;
         this.price = price;
         this.createDate = createDate;
+        this.quantity = quantity;
     }
 
     public String getInvoiceID() {
@@ -71,6 +72,14 @@ public class InvoiceDetail implements Serializable {
         this.createDate = createDate;
     }
 
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
     @Override
     public String toString() {
         return "Invoice ID: " + invoiceID +
@@ -78,6 +87,7 @@ public class InvoiceDetail implements Serializable {
                 ", Product Name: " + productName +
                 ", Promotion Rate: " + promotionRate +
                 ", Price: " + price +
-                ", Create Date: " + createDate;
+                ", Create Date: " + createDate +
+                ", Quantity: " + quantity; // Thêm hiển thị số lượng
     }
 }

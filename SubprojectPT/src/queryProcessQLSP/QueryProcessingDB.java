@@ -258,7 +258,6 @@ public class QueryProcessingDB {
         return suppliers;
     }
     
-    //Xem danh sách hóa đơn theo mã hóa đơn
     public List<InvoiceDetail> getInvoiceDetails() {
         List<InvoiceDetail> invoiceDetails = new ArrayList<>();
         String query = "SELECT * FROM invoice_detail ORDER BY invoiceid";
@@ -271,7 +270,8 @@ public class QueryProcessingDB {
                 double promotionRate = resultSet.getDouble("promotionrate");
                 double price = resultSet.getDouble("price");
                 Date createDate = resultSet.getDate("createdate");
-                InvoiceDetail invoiceDetail = new InvoiceDetail(invoiceID, productID, productName, promotionRate, price, createDate);
+                int quantity = resultSet.getInt("quantitybuy"); // Lấy số lượng sản phẩm
+                InvoiceDetail invoiceDetail = new InvoiceDetail(invoiceID, productID, productName, promotionRate, price, createDate, quantity);
                 invoiceDetails.add(invoiceDetail);
             }
         } catch (SQLException e) {
@@ -279,7 +279,7 @@ public class QueryProcessingDB {
         }
         return invoiceDetails;
     }
-    
+
     public List<InvoiceDetail> searchInvoiceDetails(String invoiceID) {
         List<InvoiceDetail> invoiceDetails = new ArrayList<>();
         String query = "SELECT * FROM invoice_detail WHERE invoiceid = ?";
@@ -292,7 +292,8 @@ public class QueryProcessingDB {
                 double promotionRate = resultSet.getDouble("promotionrate");
                 double price = resultSet.getDouble("price");
                 Date createDate = resultSet.getDate("createdate");
-                InvoiceDetail invoiceDetail = new InvoiceDetail(invoiceID, productID, productName, promotionRate, price, createDate);
+                int quantity = resultSet.getInt("quantitybuy"); // Lấy số lượng sản phẩm
+                InvoiceDetail invoiceDetail = new InvoiceDetail(invoiceID, productID, productName, promotionRate, price, createDate, quantity);
                 invoiceDetails.add(invoiceDetail);
             }
         } catch (SQLException e) {
