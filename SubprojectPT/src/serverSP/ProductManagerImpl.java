@@ -3,6 +3,7 @@ package serverSP;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 import databaseQLSP.DatabaseConnection;
@@ -11,6 +12,7 @@ import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
+import queryProcessQLSP.invoiceCreator;
 import queryProcessQLSP.QueryProcessingDB;
 
 public class ProductManagerImpl extends UnicastRemoteObject implements interfaceProductManager {
@@ -19,7 +21,7 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	 */
 	private static final long serialVersionUID = 1L;
 	private QueryProcessingDB queryProcessor;
-
+	private invoiceCreator invoiceCreator;
     public ProductManagerImpl() throws RemoteException {
         super();
         // Tạo đối tượng DatabaseConnection và kết nối đến cơ sở dữ liệu
@@ -28,6 +30,7 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
         
         // Khởi tạo QueryProcessingDB với đối tượng Connection
         queryProcessor = new QueryProcessingDB(connection);
+        invoiceCreator = new invoiceCreator(connection);
     }
 
     // Chức năng Thêm
@@ -118,4 +121,14 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 		return queryProcessor.searchInvoiceDetails(invoiceID);
 	}
 
+	   @Override
+	    public boolean createInvoice(List<String> productIds, List<Integer> quantities) throws RemoteException {
+	        try {
+	            // Gọi phương thức tạo hóa đơn từ lớp InvoiceCreator
+	            return invoiceCreator.createInvoice(productIds, quantities);
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            throw new RemoteException("Error while creating invoice", e);
+	        }
+	    }
 }

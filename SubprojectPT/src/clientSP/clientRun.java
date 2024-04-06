@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -39,11 +40,11 @@ public class clientRun {
                 System.out.println("10. Cập nhật khuyến mãi");
                 System.out.println("11. Xóa khuyến mãi");
                 System.out.println("12. Tìm kiếm khuyến mãi");
-                System.out.println("13. Tìm kiếm hóa đơn");
                 System.out.println("14. Thêm nhà cung cấp");
                 System.out.println("15. Cập nhật nhà cung cấp");
                 System.out.println("16. Xóa nhà cung cấp");
                 System.out.println("17. Tìm kiếm hóa đơn");
+                System.out.println("18. Tạo hóa đơn");
                 System.out.println("0. Thoát");
                 
                 System.out.print("Nhập lựa chọn của bạn: ");
@@ -98,6 +99,10 @@ public class clientRun {
                         break;
                     case 17:
                     	searchInvoiceDetail(scanner, productManager);
+                        break;
+                    case 18:
+                        createInvoice(scanner, productManager); // Thêm tùy chọn tạo hóa đơn
+                        break;
                     case 0:
                         System.out.println("Đã thoát");
                         break;
@@ -411,6 +416,47 @@ public class clientRun {
             }
         } catch (RemoteException e) {
             System.err.println("Lỗi khi tìm kiếm chi tiết hóa đơn: " + e.getMessage());
+        }
+    }
+    private static void createInvoice(Scanner scanner, interfaceProductManager productManager) {
+        try {
+            List<String> productIds = new ArrayList<>();
+            List<Integer> quantities = new ArrayList<>();
+
+            // Nhập thông tin sản phẩm và số lượng
+            System.out.println("Nhập thông tin sản phẩm và số lượng (nhập '0' để tạo hóa đơn):");
+            while (true) {
+                System.out.print("Nhập ID sản phẩm: ");
+                String productId = scanner.next();
+                if (productId.equals("0")) {
+                    break;
+                }
+
+                System.out.print("Nhập số lượng: ");
+                int quantity = scanner.nextInt();
+
+                productIds.add(productId);
+                quantities.add(quantity);
+
+                System.out.println("Nhập '1' để tiếp tục thêm sản phẩm, nhập '0' để tạo hóa đơn:");
+                int choice = scanner.nextInt();
+                if (choice == 0) {
+                    break;
+                }
+            }
+
+            // Gọi phương thức tạo hóa đơn từ đối tượng productManager
+            boolean result = productManager.createInvoice(productIds, quantities);
+            if (result) {
+                System.out.println("Hóa đơn đã được tạo thành công.");
+            } else {
+                System.out.println("Đã xảy ra lỗi khi tạo hóa đơn.");
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while creating invoice: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error: Invalid input format or data. Please try again.");
+            scanner.nextLine(); // Clear the buffer
         }
     }
 

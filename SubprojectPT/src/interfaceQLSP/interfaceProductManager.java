@@ -14,7 +14,8 @@ public interface interfaceProductManager extends Remote {
     public void addProduct(Product product) throws RemoteException;
     public void addPromotion(Promotion promotion) throws RemoteException;
     public void addSupplier(SupplierSP supplier) throws RemoteException;
-
+    // Tạo hóa đơn
+    boolean createInvoice(List<String> productIds, List<Integer> quantities) throws RemoteException;
     // Chức năng Đọc
     public List<Product> getProducts() throws RemoteException;
     

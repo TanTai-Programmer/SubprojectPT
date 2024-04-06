@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 04, 2024 lúc 12:09 PM
+-- Thời gian đã tạo: Th4 05, 2024 lúc 07:59 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -43,6 +43,41 @@ INSERT INTO `invoice` (`invoiceid`, `createdate`, `totalamount`) VALUES
 ('hd00003', '2024-04-03', 2460.000),
 ('hd00004', '2024-04-04', 2970.000),
 ('hd00005', '2024-04-05', 1670.000);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `invoice_detail`
+--
+
+CREATE TABLE `invoice_detail` (
+  `invoiceid` varchar(10) NOT NULL,
+  `productid` varchar(10) NOT NULL,
+  `productname` varchar(255) DEFAULT NULL,
+  `promotionrate` decimal(5,2) DEFAULT NULL,
+  `quantitybuy` int(11) NOT NULL,
+  `price` decimal(10,3) DEFAULT NULL,
+  `createdate` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `invoice_detail`
+--
+
+INSERT INTO `invoice_detail` (`invoiceid`, `productid`, `productname`, `promotionrate`, `quantitybuy`, `price`, `createdate`) VALUES
+('hd00001', 'sp00003', 'Laptop Dell XPS 13', 0.10, 1, 1350.000, '2024-04-01'),
+('hd00001', 'sp00004', 'Smartphone Samsung Galaxy S21', 0.00, 1, 1200.000, '2024-04-01'),
+('hd00002', 'sp00004', 'Smartphone Samsung Galaxy S21', 0.20, 1, 960.000, '2024-04-02'),
+('hd00002', 'sp00005', 'Smart TV LG 55-inch 4K', 0.00, 1, 900.000, '2024-04-02'),
+('hd00003', 'sp00003', 'Laptop Dell XPS 13', 0.10, 1, 1350.000, '2024-04-03'),
+('hd00003', 'sp00005', 'Smart TV LG 55-inch 4K', 0.10, 1, 810.000, '2024-04-03'),
+('hd00003', 'sp00006', 'Wireless Headphones Sony WH-1000XM4', 0.00, 1, 300.000, '2024-04-03'),
+('hd00004', 'sp00003', 'Laptop Dell XPS 13', 0.00, 1, 1500.000, '2024-04-04'),
+('hd00004', 'sp00004', 'Smartphone Samsung Galaxy S21', 0.00, 1, 1200.000, '2024-04-04'),
+('hd00004', 'sp00006', 'Wireless Headphones Sony WH-1000XM4', 0.10, 1, 270.000, '2024-04-04'),
+('hd00005', 'sp00005', 'Smart TV LG 55-inch 4K', 0.00, 1, 900.000, '2024-04-05'),
+('hd00005', 'sp00006', 'Wireless Headphones Sony WH-1000XM4', 0.10, 1, 270.000, '2024-04-05'),
+('hd00005', 'sp00007', 'Gaming Console Sony PlayStation 5', 0.00, 1, 500.000, '2024-04-05');
 
 -- --------------------------------------------------------
 
@@ -128,6 +163,13 @@ ALTER TABLE `invoice`
   ADD PRIMARY KEY (`invoiceid`);
 
 --
+-- Chỉ mục cho bảng `invoice_detail`
+--
+ALTER TABLE `invoice_detail`
+  ADD PRIMARY KEY (`invoiceid`,`productid`),
+  ADD KEY `productid` (`productid`);
+
+--
 -- Chỉ mục cho bảng `product`
 --
 ALTER TABLE `product`
@@ -143,6 +185,13 @@ ALTER TABLE `supplier`
 --
 -- Các ràng buộc cho các bảng đã đổ
 --
+
+--
+-- Các ràng buộc cho bảng `invoice_detail`
+--
+ALTER TABLE `invoice_detail`
+  ADD CONSTRAINT `invoice_detail_ibfk_1` FOREIGN KEY (`invoiceid`) REFERENCES `invoice` (`invoiceid`),
+  ADD CONSTRAINT `invoice_detail_ibfk_2` FOREIGN KEY (`productid`) REFERENCES `product` (`productid`);
 
 --
 -- Các ràng buộc cho bảng `product`
