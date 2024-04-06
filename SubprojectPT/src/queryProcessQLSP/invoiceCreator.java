@@ -1,4 +1,5 @@
 package queryProcessQLSP;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,6 +61,9 @@ public class invoiceCreator {
             statement.executeUpdate();
             statement.close();
 
+            // Cập nhật số lượng sản phẩm trong kho
+            updateProductQuantity(productIds, quantities);
+
             // Commit giao dịch
             connection.commit();
             return true;
@@ -86,6 +90,7 @@ public class invoiceCreator {
         }
         return 0;
     }
+
     private String getProductName(String productId) throws SQLException {
         PreparedStatement statement = connection.prepareStatement("SELECT productname FROM product WHERE productid = ?");
         statement.setString(1, productId);
@@ -95,6 +100,7 @@ public class invoiceCreator {
         }
         return null;
     }
+
     private double applyPromotion(String productId, double price) throws SQLException {
         double discountedPrice = price;
 
@@ -118,5 +124,34 @@ public class invoiceCreator {
             return resultSet.getDouble("promotionrate");
         }
         return 0.0; // Trả về 0% nếu không tìm thấy khuyến mãi
+    }
+
+    private void updateProductQuantity(List<String> productIds, List<Integer> quantities) throws SQLException {
+        try {
+            for (int i = 0; i < productIds.size(); i++) {
+                String productId = productIds.get(i);
+                int quantitySold = quantities.get(i);
+
+                // Lấy số lượng hiện tại của sản phẩm
+                PreparedStatement statement = connection.prepareStatement("SELECT quantity FROM product WHERE productid = ?");
+                statement.setString(1, productId);
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    int currentQuantity = resultSet.getInt("quantity");
+                    int updatedQuantity = currentQuantity - quantitySold;
+
+                    // Cập nhật số lượng sản phẩm trong kho
+                    PreparedStatement updateStatement = connection.prepareStatement("UPDATE product SET quantity = ? WHERE productid = ?");
+                    updateStatement.setInt(1, updatedQuantity);
+                    updateStatement.setString(2, productId);
+                    updateStatement.executeUpdate();
+                    updateStatement.close();
+                }
+                statement.close();
+            }
+        } catch (SQLException e) {
+            connection.rollback(); // Rollback nếu có lỗi xảy ra
+            e.printStackTrace();
+        }
     }
 }
