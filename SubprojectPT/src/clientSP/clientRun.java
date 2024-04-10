@@ -29,7 +29,7 @@ public class clientRun {
             do {
                 System.out.println("Menu:");
                 System.out.println("1. Xem danh sách sản phẩm");
-                System.out.println("2. Xem danh sách hóa đơn");
+                System.out.println("2. Xem danh sách chi tiết hóa đơn");
                 System.out.println("3. Xem danh sách khuyến mãi");
                 System.out.println("4. Xem danh sách nhà cung cấp");
                 System.out.println("5. Thêm sản phẩm");
@@ -45,6 +45,10 @@ public class clientRun {
                 System.out.println("16. Xóa nhà cung cấp");
                 System.out.println("17. Tìm kiếm hóa đơn");
                 System.out.println("18. Tạo hóa đơn");
+                System.out.println("19. Xem danh sách sản phẩm sắp xếp theo số lượng tăng dần");
+                System.out.println("20. Xem danh sách sản phẩm sắp xếp theo giá tăng dần");
+                System.out.println("21. Xem danh sách sản phẩm sắp xếp theo số lượng giảm dần");
+                System.out.println("22. Xem danh sách sản phẩm sắp xếp theo giá giảm dần");
                 System.out.println("0. Thoát");
                 
                 System.out.print("Nhập lựa chọn của bạn: ");
@@ -102,6 +106,18 @@ public class clientRun {
                         break;
                     case 18:
                         createInvoice(scanner, productManager); // Thêm tùy chọn tạo hóa đơn
+                        break;
+                    case 19:
+                        displayProductsSortQuantityASC(productManager);
+                        break;
+                    case 20:
+                        displayProductsSortPriceASC(productManager);
+                        break;
+                    case 21:
+                        displayProductsSortQuantityDESC(productManager);
+                        break;
+                    case 22:
+                        displayProductsSortPriceDESC(productManager);
                         break;
                     case 0:
                         System.out.println("Đã thoát");
@@ -459,6 +475,49 @@ public class clientRun {
             scanner.nextLine(); // Clear the buffer
         }
     }
-
+    private static void displayProductsSortQuantityASC(interfaceProductManager productManager) {
+        try {
+            List<Product> products = productManager.sortProductsQuantityASC();
+            System.out.println("Danh sách sản phẩm:");
+            for (Product product : products) {
+                System.out.println(product);
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while getting products: " + e.getMessage());
+        }
+    }
+    private static void displayProductsSortPriceASC(interfaceProductManager productManager) {
+        try {
+            List<Product> products = productManager.sortProductsPriceASC();
+            System.out.println("Danh sách sản phẩm:");
+            for (Product product : products) {
+                System.out.println(product);
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while getting products: " + e.getMessage());
+        }
+    }
+    private static void displayProductsSortQuantityDESC(interfaceProductManager productManager) {
+        try {
+            List<Product> products = productManager.sortProductsQuantityASC();
+            System.out.println("Danh sách sản phẩm:");
+            for (Product product : products) {
+                System.out.println(product);
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while getting products: " + e.getMessage());
+        }
+    }
+    private static void displayProductsSortPriceDESC(interfaceProductManager productManager) {
+        try {
+            List<Product> products = productManager.sortProductsPriceASC();
+            System.out.println("Danh sách sản phẩm:");
+            for (Product product : products) {
+                System.out.println(product);
+            }
+        } catch (RemoteException e) {
+            System.err.println("Error while getting products: " + e.getMessage());
+        }
+    }
 }
 

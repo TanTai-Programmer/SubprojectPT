@@ -40,4 +40,10 @@ public interface interfaceProductManager extends Remote {
     public List<Promotion> searchPromotions(String keyword) throws RemoteException;
     public List<SupplierSP> searchSuppliers(String keyword) throws RemoteException;
     List<InvoiceDetail> searchInvoiceDetails(String invoiceID) throws RemoteException;
+    
+    // Chức năng sắp xếp sản phẩm
+    public List<Product> sortProductsQuantityASC() throws RemoteException;
+    public List<Product> sortProductsPriceASC() throws RemoteException;
+    public List<Product> sortProductsQuantityDESC() throws RemoteException;
+    public List<Product> sortProductsPriceDESC() throws RemoteException;
 }

@@ -301,5 +301,78 @@ public class QueryProcessingDB {
         }
         return invoiceDetails;
     }
-
+    //Chức năng sắp xếp bảng sản phẩm
+    public List<Product> sortProductQuantityASC() {
+        List<Product> products = new ArrayList<>();
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY quantity ASC;")) {
+            while (resultSet.next()) {
+                String productID = resultSet.getString("productid");
+                String productName = resultSet.getString("productname");
+                double price = resultSet.getDouble("price");
+                int quantity = resultSet.getInt("quantity");
+                String description = resultSet.getString("description");
+                String supplierID = resultSet.getString("supplierid");
+                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+    public List<Product> sortProductPriceASC() {
+        List<Product> products = new ArrayList<>();
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY price ASC;")) {
+            while (resultSet.next()) {
+                String productID = resultSet.getString("productid");
+                String productName = resultSet.getString("productname");
+                double price = resultSet.getDouble("price");
+                int quantity = resultSet.getInt("quantity");
+                String description = resultSet.getString("description");
+                String supplierID = resultSet.getString("supplierid");
+                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+    public List<Product> sortProductQuantityDESC() {
+        List<Product> products = new ArrayList<>();
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY quantity DESc;")) {
+            while (resultSet.next()) {
+                String productID = resultSet.getString("productid");
+                String productName = resultSet.getString("productname");
+                double price = resultSet.getDouble("price");
+                int quantity = resultSet.getInt("quantity");
+                String description = resultSet.getString("description");
+                String supplierID = resultSet.getString("supplierid");
+                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+    public List<Product> sortProductPriceDESC() {
+        List<Product> products = new ArrayList<>();
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY price DESC;")) {
+            while (resultSet.next()) {
+                String productID = resultSet.getString("productid");
+                String productName = resultSet.getString("productname");
+                double price = resultSet.getDouble("price");
+                int quantity = resultSet.getInt("quantity");
+                String description = resultSet.getString("description");
+                String supplierID = resultSet.getString("supplierid");
+                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+    
 }

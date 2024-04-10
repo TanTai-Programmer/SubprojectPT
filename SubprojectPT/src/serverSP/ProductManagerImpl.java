@@ -131,4 +131,24 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	            throw new RemoteException("Error while creating invoice", e);
 	        }
 	    }
+
+	@Override
+	public List<Product> sortProductsQuantityASC() throws RemoteException {
+		return queryProcessor.sortProductQuantityASC();
+	}
+
+	@Override
+	public List<Product> sortProductsPriceASC() throws RemoteException {
+		return queryProcessor.sortProductPriceASC();
+	}
+
+	@Override
+	public List<Product> sortProductsQuantityDESC() throws RemoteException {
+		return queryProcessor.sortProductQuantityDESC();
+	}
+
+	@Override
+	public List<Product> sortProductsPriceDESC() throws RemoteException {
+		return queryProcessor.sortProductPriceDESC();
+	}
 }
