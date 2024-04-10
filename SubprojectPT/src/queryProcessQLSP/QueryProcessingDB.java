@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import objectQLSP.Invoice;
 import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
@@ -179,7 +180,6 @@ public class QueryProcessingDB {
         return promotions;
     }
 
-
     public List<SupplierSP> searchSuppliers(String keyword) {
         List<SupplierSP> suppliers = new ArrayList<>();
         String query = "SELECT * FROM supplier WHERE suppliername LIKE ?";
@@ -301,6 +301,26 @@ public class QueryProcessingDB {
         }
         return invoiceDetails;
     }
+    
+    // Tìm kiếm hóa đơn theo mã hóa đơn invoiceid
+    public List<Invoice> searchInvoice(String invoiceID) {
+        List<Invoice> invoices = new ArrayList<>();
+        String query = "SELECT * FROM invoice WHERE invoiceid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, invoiceID);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String invoiceId = resultSet.getString("invoiceid");
+                Date createDate = resultSet.getDate("createdate");
+                double totalAmount = resultSet.getDouble("totalamount");
+                Invoice invoice = new Invoice(invoiceID, createDate, totalAmount);
+                invoices.add(invoice);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoices;
+    }
     //Chức năng sắp xếp bảng sản phẩm
     public List<Product> sortProductQuantityASC() {
         List<Product> products = new ArrayList<>();
@@ -374,5 +394,76 @@ public class QueryProcessingDB {
         }
         return products;
     }
-    
+    public List<Promotion> sortPromotionsDateASC() {
+        List<Promotion> promotions = new ArrayList<>();
+        String query = "SELECT * FROM `promotion` ORDER BY `promotion`.`startdate` ASC";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String productID = resultSet.getString("productid");
+                String supplierID = resultSet.getString("supplierid");
+                double promotionRate = resultSet.getDouble("promotionrate");
+                Date startDate = resultSet.getDate("startdate");
+                Date endDate = resultSet.getDate("enddate");
+                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+                promotions.add(promotion);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return promotions;
+    }
+    public List<Promotion> sortPromotionsDateDESC() {
+        List<Promotion> promotions = new ArrayList<>();
+        String query = "SELECT * FROM `promotion` ORDER BY `promotion`.`startdate` DESC";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String productID = resultSet.getString("productid");
+                String supplierID = resultSet.getString("supplierid");
+                double promotionRate = resultSet.getDouble("promotionrate");
+                Date startDate = resultSet.getDate("startdate");
+                Date endDate = resultSet.getDate("enddate");
+                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+                promotions.add(promotion);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return promotions;
+    }
+    public List<Invoice> sortInvoicePriceASC() {
+        List<Invoice> invoices = new ArrayList<>();
+        String query = "SELECT * FROM `invoice` ORDER BY `invoice`.`totalamount` ASC";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String invoiceId = resultSet.getString("invoiceid");
+                Date createDate = resultSet.getDate("createdate");
+                double totalAmount = resultSet.getDouble("totalamount");
+                Invoice invoice = new Invoice(invoiceId, createDate, totalAmount);
+                invoices.add(invoice);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoices;
+    }
+    public List<Invoice> sortInvoicePriceDESC() {
+        List<Invoice> invoices = new ArrayList<>();
+        String query = "SELECT * FROM `invoice` ORDER BY `invoice`.`totalamount` DESC";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                String invoiceId = resultSet.getString("invoiceid");
+                Date createDate = resultSet.getDate("createdate");
+                double totalAmount = resultSet.getDouble("totalamount");
+                Invoice invoice = new Invoice(invoiceId, createDate, totalAmount);
+                invoices.add(invoice);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return invoices;
+    }
 }

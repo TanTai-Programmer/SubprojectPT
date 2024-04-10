@@ -14,12 +14,17 @@ import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
 
-public class clientRun {
+public class clientRun{
+	public clientRun() {
+	}
 
     public static void main(String[] args) {
         try {
             // Kết nối đến registry trên máy chủ
             Registry registry = LocateRegistry.getRegistry("localhost");
+            
+            //Kết nối đến máy ảo hoặc IP máy chủ đăng ký 
+            //Registry registry = LocateRegistry.getRegistry("192.168.145.1", 1099);
             
             // Lấy ra đối tượng từ xa từ registry
             interfaceProductManager productManager = (interfaceProductManager) registry.lookup("ProductManager");

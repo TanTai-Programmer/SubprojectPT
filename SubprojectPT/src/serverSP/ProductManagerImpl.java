@@ -8,6 +8,7 @@ import java.util.List;
 
 import databaseQLSP.DatabaseConnection;
 import interfaceQLSP.interfaceProductManager;
+import objectQLSP.Invoice;
 import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
@@ -150,5 +151,30 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	@Override
 	public List<Product> sortProductsPriceDESC() throws RemoteException {
 		return queryProcessor.sortProductPriceDESC();
+	}
+
+	@Override
+	public List<Invoice> searchInvoice(String invoiceID) throws RemoteException {
+		return queryProcessor.searchInvoice(invoiceID);
+	}
+
+	@Override
+	public List<Promotion> sortPromotionsDateASC() throws RemoteException {
+		return queryProcessor.sortPromotionsDateASC();
+	}
+
+	@Override
+	public List<Promotion> sortPromotionsDateDESC() throws RemoteException {
+		return queryProcessor.sortPromotionsDateDESC();
+	}
+
+	@Override
+	public List<Invoice> sortInvoicePriceASC() throws RemoteException {
+		return queryProcessor.sortInvoicePriceASC();
+	}
+
+	@Override
+	public List<Invoice> sortInvoicePriceDESC() throws RemoteException {
+		return queryProcessor.sortInvoicePriceDESC();
 	}
 }
