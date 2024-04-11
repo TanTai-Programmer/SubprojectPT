@@ -8,16 +8,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JFrame;
+
 import interfaceQLSP.interfaceProductManager;
 import objectQLSP.InvoiceDetail;
 import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
 
-public class clientRun{
-	public clientRun() {
-	}
 
+public class clientRun extends JFrame{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
     public static void main(String[] args) {
         try {
             // Kết nối đến registry trên máy chủ
