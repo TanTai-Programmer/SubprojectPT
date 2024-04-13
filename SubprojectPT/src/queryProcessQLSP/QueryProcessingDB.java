@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -322,6 +324,49 @@ public class QueryProcessingDB {
         return invoices;
     }
     //Chức năng sắp xếp bảng sản phẩm
+ // Đối với chức năng sắp xếp danh sách sản phẩm theo giá từ thấp đến cao
+    public List<Product> sortProductsByPriceAscending(List<Product> productList) {
+        // Sắp xếp danh sách sản phẩm theo giá từ thấp đến cao
+        Collections.sort(productList, new Comparator<Product>() {
+            @Override
+            public int compare(Product p1, Product p2) {
+                return Double.compare(p1.getPrice(), p2.getPrice());
+            }
+        });
+        return productList;
+    }
+    public List<Product> sortProductsByPriceDescending(List<Product> productList) {
+        // Sắp xếp danh sách sản phẩm theo giá từ cao đến thấp
+        Collections.sort(productList, new Comparator<Product>() {
+            @Override
+            public int compare(Product p1, Product p2) {
+                return Double.compare(p2.getPrice(), p1.getPrice()); // Đảo ngược thứ tự so sánh
+            }
+        });
+        return productList;
+    }
+    public List<Product> sortProductsByQuantityAscending(List<Product> productList) {
+        // Sắp xếp danh sách sản phẩm theo số lượng từ thấp đến cao
+        Collections.sort(productList, new Comparator<Product>() {
+            @Override
+            public int compare(Product p1, Product p2) {
+                return Integer.compare(p1.getQuantity(), p2.getQuantity());
+            }
+        });
+        return productList;
+    }
+
+    public List<Product> sortProductsByQuantityDescending(List<Product> productList) {
+        // Sắp xếp danh sách sản phẩm theo số lượng từ cao đến thấp
+        Collections.sort(productList, new Comparator<Product>() {
+            @Override
+            public int compare(Product p1, Product p2) {
+                return Integer.compare(p2.getQuantity(), p1.getQuantity()); // Đảo ngược thứ tự so sánh
+            }
+        });
+        return productList;
+    }
+
     public List<Product> sortProductQuantityASC() {
         List<Product> products = new ArrayList<>();
         try (Statement statement = connection.createStatement();

@@ -177,4 +177,19 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	public List<Invoice> sortInvoicePriceDESC() throws RemoteException {
 		return queryProcessor.sortInvoicePriceDESC();
 	}
+
+	@Override
+	public List<Product> sortProductsByPriceAscending(List<Product> productList) throws RemoteException {
+		return queryProcessor.sortProductsByPriceAscending(productList);
+	}
+	@Override
+	public List<Product> sortProductsByPriceDescending(List<Product> productList) throws RemoteException {
+		return queryProcessor.sortProductsByPriceAscending(productList);
+	}
+	public List<Product> sortProductsByQuantityAscending(List<Product> productList) throws RemoteException{
+		return queryProcessor.sortProductsByQuantityAscending(productList);
+	}
+	public List<Product> sortProductsByQuantityDescending(List<Product> productList) throws RemoteException{
+		return queryProcessor.sortProductsByQuantityDescending(productList);
+	}
 }

@@ -49,6 +49,10 @@ public interface interfaceProductManager extends Remote {
     public List<Product> sortProductsQuantityDESC() throws RemoteException;
     public List<Product> sortProductsPriceDESC() throws RemoteException;
     
+    public List<Product> sortProductsByPriceAscending(List<Product> productList) throws RemoteException;
+    public List<Product> sortProductsByPriceDescending(List<Product> productList) throws RemoteException;
+    public List<Product> sortProductsByQuantityAscending(List<Product> productList)throws RemoteException;
+    public List<Product> sortProductsByQuantityDescending(List<Product> productList)throws RemoteException;
     // Chức năng sắp xếp khuyến mãi theo ngày
     public List<Promotion> sortPromotionsDateASC() throws RemoteException;
     public List<Promotion> sortPromotionsDateDESC() throws RemoteException;

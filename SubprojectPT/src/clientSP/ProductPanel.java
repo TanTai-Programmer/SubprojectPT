@@ -3,11 +3,16 @@ package clientSP;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableModel;
+
+import java.util.ArrayList;
 import java.util.List;
 import interfaceQLSP.interfaceProductManager;
 import objectQLSP.Product;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
 
 public class ProductPanel extends JPanel {
@@ -16,11 +21,12 @@ public class ProductPanel extends JPanel {
 	 * 
 	 */
 		private static final long serialVersionUID = 1L;
-	 	private JTable table;
-	    private DefaultTableModel tableModel;
+		private JTable table;
 	    private JPanel leftSubPanel2;
 	    private interfaceProductManager productManager;
-	    
+	    private List<Product> productResult;
+	    private  List<Product> editedProducts = new ArrayList<>();
+
 	    public ProductPanel(interfaceProductManager productManager){
 	    	this.productManager = productManager;
         setLayout(new GridBagLayout());
@@ -64,7 +70,18 @@ public class ProductPanel extends JPanel {
         gbcSearchButton.anchor = GridBagConstraints.WEST; // Căn trái
         gbcSearchButton.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
         leftSubPanel1.add(searchButton, gbcSearchButton);
-
+        searchButton.addActionListener(e -> {
+        	 // Lấy từ khóa tìm kiếm từ TextField
+            String keyword = searchField.getText(); 
+			try {
+				productResult = productManager.searchProducts(keyword);
+		           // Cập nhật bảng hiển thị dữ liệu với kết quả tìm kiếm
+	            updateTable(productResult, leftSubPanel2);
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        });
         // ComboBox có 4 tùy chọn
         String[] options = {"Giá tăng dần", "Giá giảm dần", "Số lượng tăng dần", "Số lượng giảm dần"};
         JComboBox<String> comboBox = new JComboBox<>(options);
@@ -74,19 +91,19 @@ public class ProductPanel extends JPanel {
             String selectedOption = (String) comboBox.getSelectedItem();
             try {
 				if (selectedOption.equals("Giá tăng dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsPriceASC();
+                    List<Product> sortedProducts = productManager.sortProductsByPriceAscending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 } else if (selectedOption.equals("Giá giảm dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsPriceDESC();
+                    List<Product> sortedProducts = productManager.sortProductsByPriceDescending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 } else if (selectedOption.equals("Số lượng giảm dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsQuantityDESC();
+                    List<Product> sortedProducts = productManager.sortProductsByQuantityAscending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 }else if (selectedOption.equals("Số lượng tăng dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsQuantityASC();
+                    List<Product> sortedProducts = productManager.sortProductsByQuantityDescending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 }
@@ -134,11 +151,57 @@ public class ProductPanel extends JPanel {
         JButton btnNewButton = new JButton("Update");
         btnNewButton.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Update"
         leftSubPanel3.add(btnNewButton);
+     // Xử lý sự kiện cho nút "Update"
+        btnNewButton.addActionListener(e -> {
+            // Lặp qua danh sách các đối tượng Product đã chỉnh sửa
+            for (Product editedProduct : editedProducts) {
+                // Cập nhật thông tin của đối tượng Product lên server từ xa
+                try {
+                	
+                    productManager.updateProduct(editedProduct);
+                    productResult =   productManager.getProducts();
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            // Xóa danh sách các đối tượng Product đã chỉnh sửa sau khi cập nhật thành công
+            editedProducts.clear();
+            // Sau khi cập nhật, bạn có thể làm các công việc khác như cập nhật lại bảng
+        });
 
         // Nút "Delete"
         JButton btnNewButton_1 = new JButton("Delete");
         btnNewButton_1.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Delete"
         leftSubPanel3.add(btnNewButton_1);
+     // Xử lý sự kiện khi nhấn nút "Delete"
+        btnNewButton_1.addActionListener(e -> {
+            // Lấy chỉ số hàng của dòng được chọn trong bảng
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                // Kiểm tra xem người dùng đã chọn một dòng trong bảng chưa
+                JOptionPane.showMessageDialog(null, "Vui lòng chọn một sản phẩm để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Lấy ID của sản phẩm từ dòng được chọn
+            String productID = table.getValueAt(selectedRow, 0).toString();
+
+            // Gọi phương thức deleteProduct từ xa với ID của sản phẩm
+            try {
+                productManager.deleteProduct(productID);
+                // Xóa sản phẩm từ bảng dữ liệu
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                model.removeRow(selectedRow); // Xóa dòng tương ứng từ bảng
+
+                // Hiển thị thông báo thành công (nếu cần)
+                JOptionPane.showMessageDialog(null, "Đã xóa sản phẩm thành công.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            } catch (RemoteException ex) {
+                ex.printStackTrace();
+                // Xử lý ngoại lệ khi gặp lỗi khi gọi phương thức từ xa
+                JOptionPane.showMessageDialog(null, "Lỗi khi xóa sản phẩm.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
 
         GridBagConstraints gbcLeftSubPanel3 = new GridBagConstraints();
         gbcLeftSubPanel3.gridx = 0;
@@ -336,6 +399,34 @@ public class ProductPanel extends JPanel {
         gbcRightSubPanel3.weightx = 1;
         gbcRightSubPanel3.fill = GridBagConstraints.BOTH; // Mở rộng cả hai chiều
         rightPanel.add(rightSubPanel3, gbcRightSubPanel3);
+        addButton.addActionListener(e -> {
+            // Lấy thông tin từ các trường nhập
+            String productID = productIDField.getText();
+            String productName = productNameField.getText();
+            double price = Double.parseDouble(priceField.getText());
+            int quantity = Integer.parseInt(quantityField.getText());
+            String description = descriptionArea.getText();
+            String supplierID = supplierIDField.getText();
+            
+            // Tạo đối tượng Product từ thông tin đã nhập
+            Product product = new Product(productID, productName, price, quantity, description, supplierID);
+            
+            // Gọi phương thức addProduct của ProductPanel
+            try {
+				productManager.addProduct(product);
+				updateProductTable();
+				 // Xóa dữ liệu từ các trường nhập
+		        productIDField.setText("");
+		        productNameField.setText("");
+		        priceField.setText("");
+		        quantityField.setText("");
+		        descriptionArea.setText("");
+		        supplierIDField.setText("");
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        });
 
         GridBagConstraints gbcRightPanel = new GridBagConstraints();
         gbcRightPanel.gridx = 1;
@@ -351,21 +442,21 @@ public class ProductPanel extends JPanel {
         return new Dimension(800, 600); // Kích thước mặc định
     }
     
+    
     // Phương thức để tạo và điền dữ liệu vào bảng
     private void displayProductTable(JPanel panel) {
         // Lấy dữ liệu từ đối tượng phân tán
-        List<Product> productList;
         try {
-            productList = productManager.getProducts();
+            productResult = productManager.getProducts();
         } catch (RemoteException e) {
             e.printStackTrace(); // Xử lý ngoại lệ nếu cần thiết
             return;
         }
 
         // Chuyển đổi dữ liệu thành mảng 2 chiều
-        String[][] data = new String[productList.size()][6];
-        for (int i = 0; i < productList.size(); i++) {
-            Product product = productList.get(i);
+        String[][] data = new String[productResult.size()][6];
+        for (int i = 0; i < productResult.size(); i++) {
+            Product product = productResult.get(i);
             data[i][0] = product.getProductID();
             data[i][1] = product.getProductName();
             data[i][2] = String.valueOf(product.getPrice());
@@ -378,7 +469,18 @@ public class ProductPanel extends JPanel {
         String[] columnNames = {"Product ID", "Product Name", "Price", "Quantity", "Description", "Supplier ID"};
 
         // Tạo bảng hiển thị dữ liệu
-        JTable table = new JTable(data, columnNames);
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Không cho phép chỉnh sửa trực tiếp
+            }
+        };
+        table = new JTable(model);
         table.setFont(new Font("Tahoma", Font.PLAIN, 16));
         table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
         JScrollPane scrollPaneTable = new JScrollPane(table);
@@ -396,7 +498,44 @@ public class ProductPanel extends JPanel {
         Font newFont = currentFont.deriveFont(Font.BOLD, 18f);
         // Set the new font for the header
         header.setFont(newFont);
+
+        // Sự kiện lắng nghe cho bảng
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Kiểm tra xem người dùng đã nhấn đúp chuột hay chưa
+                if (e.getClickCount() == 2) {
+                    // Lấy chỉ số hàng của dòng được chọn
+                    int row = table.getSelectedRow();
+                    // Lấy dữ liệu từ mô hình bảng
+                    TableModel model = table.getModel();
+                    // Lấy dữ liệu từ các cột của dòng được chọn
+                    String productID = model.getValueAt(row, 0).toString();
+                    String productName = model.getValueAt(row, 1).toString();
+                    String price = model.getValueAt(row, 2).toString();
+                    String quantity = model.getValueAt(row, 3).toString();
+                    String description = model.getValueAt(row, 4).toString();
+                    String supplierID = model.getValueAt(row, 5).toString();
+                    // Hiển thị cửa sổ nổi để chỉnh sửa thông tin
+                    showEditWindow(productID, productName, price, quantity, description, supplierID, row);
+                }
+            }
+        });
     }
+
+    private void updateProductTable() {
+        try {
+            // Lấy danh sách sản phẩm từ ProductManager
+             productResult = productManager.getProducts();
+
+            // Cập nhật bảng hiển thị với danh sách sản phẩm mới
+            updateTable(productResult, leftSubPanel2);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            // Xử lý ngoại lệ nếu cần
+        }
+    }
+
     private void updateTable(List<Product> productList, JPanel panel) {
         // Xóa bảng hiện tại khỏi panel
         panel.removeAll();
@@ -416,12 +555,25 @@ public class ProductPanel extends JPanel {
         // Tiêu đề cột
         String[] columnNames = {"Product ID", "Product Name", "Price", "Quantity", "Description", "Supplier ID"};
 
-        // Tạo bảng mới
-        JTable table = new JTable(data, columnNames);
+     // Tạo bảng hiển thị dữ liệu
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Không cho phép chỉnh sửa trực tiếp
+            }
+        };
+        table = new JTable(model);
         table.setFont(new Font("Tahoma", Font.PLAIN, 16));
         table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
         JScrollPane scrollPaneTable = new JScrollPane(table);
         scrollPaneTable.setViewportBorder(null);
+        panel.add(scrollPaneTable, BorderLayout.CENTER); // Thêm scrollPane vào vị trí CENTER của panel
+
 
         // Customize header
         JTableHeader header = table.getTableHeader();
@@ -437,6 +589,150 @@ public class ProductPanel extends JPanel {
         // Cập nhật lại panel
         panel.revalidate();
         panel.repaint();
+        // Sự kiện lắng nghe cho bảng
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Kiểm tra xem người dùng đã nhấn đúp chuột hay chưa
+                if (e.getClickCount() == 2) {
+                    // Lấy chỉ số hàng của dòng được chọn
+                    int row = table.getSelectedRow();
+                    // Lấy dữ liệu từ mô hình bảng
+                    TableModel model = table.getModel();
+                    // Lấy dữ liệu từ các cột của dòng được chọn
+                    String productID = model.getValueAt(row, 0).toString();
+                    String productName = model.getValueAt(row, 1).toString();
+                    String price = model.getValueAt(row, 2).toString();
+                    String quantity = model.getValueAt(row, 3).toString();
+                    String description = model.getValueAt(row, 4).toString();
+                    String supplierID = model.getValueAt(row, 5).toString();
+                    // Hiển thị cửa sổ nổi để chỉnh sửa thông tin
+                    showEditWindow(productID, productName, price, quantity, description, supplierID, row);
+                }
+            }
+        });
+    }
+    private void showEditWindow(String productID, String productName, String price, String quantity, String description, String supplierID, int row) {
+        // Tạo cửa sổ nổi
+        JFrame editFrame = new JFrame("Edit Product");
+
+        // Tạo các thành phần của cửa sổ
+        JPanel editPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        // Label và TextField cho Product ID
+        JLabel productIDLabel = new JLabel("Product ID:");
+        editPanel.add(productIDLabel, gbc);
+
+        JTextField productIDField = new JTextField(20);
+        productIDField.setText(productID);
+        gbc.gridx = 1;
+        editPanel.add(productIDField, gbc);
+
+        // Label và TextField cho Product Name
+        JLabel productNameLabel = new JLabel("Product Name:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        editPanel.add(productNameLabel, gbc);
+
+        JTextField productNameField = new JTextField(20);
+        productNameField.setText(productName);
+        gbc.gridx = 1;
+        editPanel.add(productNameField, gbc);
+        // Label và TextField cho Price
+        JLabel priceLabel = new JLabel("Price:");
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        editPanel.add(priceLabel, gbc);
+
+        JTextField priceField = new JTextField(20);
+        priceField.setText(price);
+        gbc.gridx = 1;
+        editPanel.add(priceField, gbc);
+
+        // Label và TextField cho Quantity
+        JLabel quantityLabel = new JLabel("Quantity:");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        editPanel.add(quantityLabel, gbc);
+
+        JTextField quantityField = new JTextField(20);
+        quantityField.setText(quantity);
+        gbc.gridx = 1;
+        editPanel.add(quantityField, gbc);
+
+        // Label và TextField cho Description
+        JLabel descriptionLabel = new JLabel("Description:");
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        editPanel.add(descriptionLabel, gbc);
+
+        JTextArea descriptionArea = new JTextArea(5, 20);
+        descriptionArea.setText(description);
+        descriptionArea.setLineWrap(true);
+        descriptionArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(descriptionArea);
+        gbc.gridx = 1;
+        editPanel.add(scrollPane, gbc);
+
+        // Label và TextField cho Supplier ID
+        JLabel supplierIDLabel = new JLabel("Supplier ID:");
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        editPanel.add(supplierIDLabel, gbc);
+
+        JTextField supplierIDField = new JTextField(20);
+        supplierIDField.setText(supplierID);
+        gbc.gridx = 1;
+        editPanel.add(supplierIDField, gbc);
+
+        // Tạo các thành phần cho các trường dữ liệu khác tương tự
+
+        // Thêm nút "Lưu"
+        JButton saveButton = new JButton("Lưu");
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        editPanel.add(saveButton, gbc);
+
+     // Xử lý sự kiện lưu
+        saveButton.addActionListener(e -> {
+            // Lấy dữ liệu từ các trường nhập trong cửa sổ nổi
+            String editedProductID = productIDField.getText();
+            String editedProductName = productNameField.getText();
+            double editedPrice = Double.parseDouble(priceField.getText());
+            int editedQuantity = Integer.parseInt(quantityField.getText());
+            String editedDescription = descriptionArea.getText();
+            String editedSupplierID = supplierIDField.getText();
+         // Tạo một đối tượng Product mới từ các thông tin chỉnh sửa
+            Product editedProduct = new Product(editedProductID, editedProductName, editedPrice, editedQuantity, editedDescription, editedSupplierID);
+
+            // Thêm sản phẩm chỉnh sửa vào danh sách editedProducts
+            editedProducts.add(editedProduct);
+
+            // Cập nhật dòng tương ứng trong bảng
+            table.setValueAt(editedProductID, row, 0);
+            table.setValueAt(editedProductName, row, 1);
+            table.setValueAt(editedPrice, row, 2);
+            table.setValueAt(editedQuantity, row, 3);
+            table.setValueAt(editedDescription, row, 4);
+            table.setValueAt(editedSupplierID, row, 5);
+
+            // Đóng cửa sổ nổi sau khi lưu
+            editFrame.dispose();
+        });
+
+
+        // Đặt cấu hình cho cửa sổ nổi và hiển thị nó
+        editFrame.getContentPane().add(editPanel);
+        editFrame.pack();
+        editFrame.setLocationRelativeTo(null); // Hiển thị cửa sổ ở giữa màn hình
+        editFrame.setVisible(true);
     }
 
 }

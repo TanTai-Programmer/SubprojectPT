@@ -7,7 +7,11 @@ import interfaceQLSP.interfaceProductManager;
 
 
 public class MainApp extends JFrame {
-    private static CardLayout cardLayout = new CardLayout();
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static CardLayout cardLayout = new CardLayout();
     private static JPanel mainPanel = new JPanel(cardLayout);
     private static JMenuBar menuBar = new JMenuBar();
     private static JMenuItem currentMenuItem;
@@ -39,7 +43,7 @@ public class MainApp extends JFrame {
         productPanel = new ProductPanel(productManager); // Khởi tạo productPanel trước khi sử dụng
         mainPanel.add(productPanel, "Panel 1");
 
-        promotionPanel = new PromotionPanel();
+        promotionPanel = new PromotionPanel(productManager);
         mainPanel.add(promotionPanel, "Panel 2");
         // Thêm các panel khác vào mainPanel nếu cần
 
