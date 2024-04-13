@@ -49,6 +49,7 @@ public class MainApp extends JFrame {
 
         // Thêm mainPanel vào frame
         getContentPane().add(mainPanel, BorderLayout.CENTER);
+        setLocationRelativeTo(null);
     }
 
 

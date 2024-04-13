@@ -1,24 +1,38 @@
 package clientSP;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableModel;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
 import interfaceQLSP.interfaceProductManager;
-import objectQLSP.Product;
+import objectQLSP.Promotion;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
+import java.sql.Date;
 
+import com.toedter.calendar.JDateChooser;
 public class PromotionPanel extends JPanel {
    
 	/**
 	 * 
 	 */
 		private static final long serialVersionUID = 1L;
-
+		private JTable table;
 	    private JPanel leftSubPanel2;
 	    private interfaceProductManager productManager;
-	    
+	    private List<Promotion> promotionResult;
+	    private  List<Promotion> editedPromotion = new ArrayList<>();
+
 	    public PromotionPanel(interfaceProductManager productManager){
 	    	this.productManager = productManager;
         setLayout(new GridBagLayout());
@@ -62,39 +76,12 @@ public class PromotionPanel extends JPanel {
         gbcSearchButton.anchor = GridBagConstraints.WEST; // Căn trái
         gbcSearchButton.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
         leftSubPanel1.add(searchButton, gbcSearchButton);
-
+        
         // ComboBox có 4 tùy chọn
-        String[] options = {"Giá tăng dần", "Giá giảm dần", "Số lượng tăng dần", "Số lượng giảm dần"};
+        String[] options = {"Ngày tạo gần nhất", "Ngày tạo xa nhất"};
         JComboBox<String> comboBox = new JComboBox<>(options);
         comboBox.setFont(new Font("Tahoma", Font.PLAIN, 16));
 
-        comboBox.addActionListener(e -> {
-            String selectedOption = (String) comboBox.getSelectedItem();
-            try {
-				if (selectedOption.equals("Giá tăng dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsPriceASC();
-                    // Gọi phương thức để sử dụng sortedProducts
-                    updateTable(sortedProducts,leftSubPanel2);
-                } else if (selectedOption.equals("Giá giảm dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsPriceDESC();
-                    // Gọi phương thức để sử dụng sortedProducts
-                    updateTable(sortedProducts,leftSubPanel2);
-                } else if (selectedOption.equals("Số lượng giảm dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsQuantityDESC();
-                    // Gọi phương thức để sử dụng sortedProducts
-                    updateTable(sortedProducts,leftSubPanel2);
-                }else if (selectedOption.equals("Số lượng tăng dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsQuantityASC();
-                    // Gọi phương thức để sử dụng sortedProducts
-                    updateTable(sortedProducts,leftSubPanel2);
-                }
-                // Xử lý các lựa chọn khác nếu cần
-            } catch (RemoteException ex) {
-                ex.printStackTrace();
-                // Xử lý ngoại lệ nếu cần
-            }
-        });
-        
         GridBagConstraints gbcComboBox = new GridBagConstraints();
         gbcComboBox.gridx = 0;
         gbcComboBox.gridy = 1;
@@ -116,7 +103,7 @@ public class PromotionPanel extends JPanel {
         // Panel con 2
         leftSubPanel2 = new JPanel();
         leftSubPanel2.setLayout(new BorderLayout()); // Sử dụng BorderLayout
-        displayProductTable(leftSubPanel2); // Tạo bảng và thêm vào leftSubPanel2
+
         
         GridBagConstraints gbcLeftSubPanel2 = new GridBagConstraints();
         gbcLeftSubPanel2.gridx = 0;
@@ -132,11 +119,39 @@ public class PromotionPanel extends JPanel {
         JButton btnNewButton = new JButton("Update");
         btnNewButton.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Update"
         leftSubPanel3.add(btnNewButton);
-
         // Nút "Delete"
         JButton btnNewButton_1 = new JButton("Delete");
         btnNewButton_1.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Delete"
         leftSubPanel3.add(btnNewButton_1);
+        // Xử lý sự kiện khi nhấn nút "Delete"
+        btnNewButton_1.addActionListener(e -> {
+            // Lấy chỉ số hàng của dòng được chọn trong bảng
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                // Kiểm tra xem người dùng đã chọn một dòng trong bảng chưa
+                JOptionPane.showMessageDialog(null, "Vui lòng chọn một sản phẩm để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Lấy ID của sản phẩm từ dòng được chọn
+            String productID = table.getValueAt(selectedRow, 0).toString();
+
+            // Gọi phương thức deleteProduct từ xa với ID của sản phẩm
+            try {
+                productManager.deleteProduct(productID);
+                // Xóa sản phẩm từ bảng dữ liệu
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                model.removeRow(selectedRow); // Xóa dòng tương ứng từ bảng
+
+                // Hiển thị thông báo thành công (nếu cần)
+                JOptionPane.showMessageDialog(null, "Đã xóa sản phẩm thành công.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            } catch (RemoteException ex) {
+                ex.printStackTrace();
+                // Xử lý ngoại lệ khi gặp lỗi khi gọi phương thức từ xa
+                JOptionPane.showMessageDialog(null, "Lỗi khi xóa sản phẩm.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
 
         GridBagConstraints gbcLeftSubPanel3 = new GridBagConstraints();
         gbcLeftSubPanel3.gridx = 0;
@@ -162,8 +177,8 @@ public class PromotionPanel extends JPanel {
         JPanel rightSubPanel1 = new JPanel();
         rightSubPanel1.setLayout(new GridBagLayout()); // Sử dụng GridBagLayout
 
-        // Label "Nhập thông tin sản phẩm"
-        JLabel label = new JLabel("Nhập thông tin sản phẩm");
+        // Label "Nhập thông tin khuyến mãi"
+        JLabel label = new JLabel("Nhập thông tin khuyến mãi");
         label.setForeground(new Color(0, 128, 255));
         label.setFont(new Font("Tahoma", Font.BOLD, 20));
         GridBagConstraints gbcLabel = new GridBagConstraints();
@@ -181,7 +196,7 @@ public class PromotionPanel extends JPanel {
         gbcRightSubPanel1.fill = GridBagConstraints.BOTH; // Mở rộng cả hai chiều
         rightPanel.add(rightSubPanel1, gbcRightSubPanel1);
 
-        // Panel con 2
+     // Panel con 2
         JPanel rightSubPanel2 = new JPanel();
         rightSubPanel2.setLayout(new GridBagLayout()); // Sử dụng GridBagLayout
 
@@ -205,107 +220,87 @@ public class PromotionPanel extends JPanel {
         gbcProductIDField.insets = new Insets(10, 5, 5, 10); // Khoảng cách giữa các thành phần
         rightSubPanel2.add(productIDField, gbcProductIDField);
 
-        // Label và TextField cho Product Name
-        JLabel productNameLabel = new JLabel("Product Name:");
-        productNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        JTextField productNameField = new JTextField(20); // Số ký tự mặc định
-        productNameField.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        productNameField.setPreferredSize(new Dimension(200, 25)); // Kích thước cụ thể
-        GridBagConstraints gbcProductNameLabel = new GridBagConstraints();
-        gbcProductNameLabel.gridx = 0;
-        gbcProductNameLabel.gridy = 1;
-        gbcProductNameLabel.anchor = GridBagConstraints.WEST; // Căn trái
-        gbcProductNameLabel.insets = new Insets(5, 10, 5, 5); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(productNameLabel, gbcProductNameLabel);
-        GridBagConstraints gbcProductNameField = new GridBagConstraints();
-        gbcProductNameField.gridx = 1;
-        gbcProductNameField.gridy = 1;
-        gbcProductNameField.fill = GridBagConstraints.HORIZONTAL; // Giãn theo chiều ngang
-        gbcProductNameField.weightx = 1.0; // Độ rộng linh hoạt
-        gbcProductNameField.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(productNameField, gbcProductNameField);
-
-        // Label và TextField cho Price
-        JLabel priceLabel = new JLabel("Price:");
-        priceLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        JTextField priceField = new JTextField(20); // Số ký tự mặc định
-        priceField.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        priceField.setPreferredSize(new Dimension(200, 25)); // Kích thước cụ thể
-        GridBagConstraints gbcPriceLabel = new GridBagConstraints();
-        gbcPriceLabel.gridx = 0;
-        gbcPriceLabel.gridy = 2;
-        gbcPriceLabel.anchor = GridBagConstraints.WEST; // Căn trái
-        gbcPriceLabel.insets = new Insets(5, 10, 5, 5); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(priceLabel, gbcPriceLabel);
-        GridBagConstraints gbcPriceField = new GridBagConstraints();
-        gbcPriceField.gridx = 1;
-        gbcPriceField.gridy = 2;
-        gbcPriceField.fill = GridBagConstraints.HORIZONTAL; // Giãn theo chiều ngang
-        gbcPriceField.weightx = 1.0; // Độ rộng linh hoạt
-        gbcPriceField.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(priceField, gbcPriceField);
-
-        // Label và TextField cho Quantity
-        JLabel quantityLabel = new JLabel("Quantity:");
-        quantityLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        JTextField quantityField = new JTextField(20); // Số ký tự mặc định
-        quantityField.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        quantityField.setPreferredSize(new Dimension(200, 25)); // Kích thước cụ thể
-        GridBagConstraints gbcQuantityLabel = new GridBagConstraints();
-        gbcQuantityLabel.gridx = 0;
-        gbcQuantityLabel.gridy = 3;
-        gbcQuantityLabel.anchor = GridBagConstraints.WEST; // Căn trái
-        gbcQuantityLabel.insets = new Insets(5, 10, 5, 5); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(quantityLabel, gbcQuantityLabel);
-        GridBagConstraints gbcQuantityField = new GridBagConstraints();
-        gbcQuantityField.gridx = 1;
-        gbcQuantityField.gridy = 3;
-        gbcQuantityField.fill = GridBagConstraints.HORIZONTAL; // Giãn theo chiều ngang
-        gbcQuantityField.weightx = 1.0; // Độ rộng linh hoạt
-        gbcQuantityField.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(quantityField, gbcQuantityField);
-
-        // Label và TextField cho Description
-        JLabel descriptionLabel = new JLabel("Description:");
-        descriptionLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        JTextArea descriptionArea = new JTextArea(5, 20); // Kích thước cụ thể (5 dòng, 20 cột)
-        descriptionArea.setLineWrap(true); // Tự động xuống dòng khi đến cuối dòng
-        descriptionArea.setWrapStyleWord(true); // Chỉ cắt từ khi cần thiết
-        JScrollPane scrollPane = new JScrollPane(descriptionArea); // Thêm thanh cuộn
-        GridBagConstraints gbcDescriptionLabel = new GridBagConstraints();
-        gbcDescriptionLabel.gridx = 0;
-        gbcDescriptionLabel.gridy = 4;
-        gbcDescriptionLabel.anchor = GridBagConstraints.NORTHWEST; // Căn trái và phía trên
-        gbcDescriptionLabel.insets = new Insets(5, 10, 5, 5); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(descriptionLabel, gbcDescriptionLabel);
-        GridBagConstraints gbcScrollPane = new GridBagConstraints();
-        gbcScrollPane.gridx = 1;
-        gbcScrollPane.gridy = 4;
-        gbcScrollPane.fill = GridBagConstraints.BOTH; // Giãn theo cả chiều ngang và chiều dọc
-        gbcScrollPane.weightx = 1.0; // Độ rộng linh hoạt
-        gbcScrollPane.weighty = 1.0; // Độ cao linh hoạt
-        gbcScrollPane.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(scrollPane, gbcScrollPane);
-
-        // Label và TextField cho Supplier ID
-        JLabel supplierIDLabel = new JLabel("Supplier ID:");
+        // Label và TextField cho Mã nhà cung cấp
+        JLabel supplierIDLabel = new JLabel("Mã nhà cung cấp:");
         supplierIDLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         JTextField supplierIDField = new JTextField(20); // Số ký tự mặc định
         supplierIDField.setFont(new Font("Tahoma", Font.PLAIN, 16));
         supplierIDField.setPreferredSize(new Dimension(200, 25)); // Kích thước cụ thể
         GridBagConstraints gbcSupplierIDLabel = new GridBagConstraints();
         gbcSupplierIDLabel.gridx = 0;
-        gbcSupplierIDLabel.gridy = 5;
+        gbcSupplierIDLabel.gridy = 1;
         gbcSupplierIDLabel.anchor = GridBagConstraints.WEST; // Căn trái
-        gbcSupplierIDLabel.insets = new Insets(5, 10, 10, 5); // Khoảng cách giữa các thành phần
+        gbcSupplierIDLabel.insets = new Insets(5, 10, 5, 5); // Khoảng cách giữa các thành phần
         rightSubPanel2.add(supplierIDLabel, gbcSupplierIDLabel);
         GridBagConstraints gbcSupplierIDField = new GridBagConstraints();
         gbcSupplierIDField.gridx = 1;
-        gbcSupplierIDField.gridy = 5;
+        gbcSupplierIDField.gridy = 1;
         gbcSupplierIDField.fill = GridBagConstraints.HORIZONTAL; // Giãn theo chiều ngang
         gbcSupplierIDField.weightx = 1.0; // Độ rộng linh hoạt
-        gbcSupplierIDField.insets = new Insets(5, 5, 10, 10); // Khoảng cách giữa các thành phần
+        gbcSupplierIDField.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
         rightSubPanel2.add(supplierIDField, gbcSupplierIDField);
+
+        // Label và TextField cho Phần trăm khuyến mãi
+        JLabel promotionRateLabel = new JLabel("Phần trăm khuyến mãi:");
+        promotionRateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        JTextField promotionRateField = new JTextField(20); // Số ký tự mặc định
+        promotionRateField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        promotionRateField.setPreferredSize(new Dimension(200, 25)); // Kích thước cụ thể
+        GridBagConstraints gbcPromotionRateLabel = new GridBagConstraints();
+        gbcPromotionRateLabel.gridx = 0;
+        gbcPromotionRateLabel.gridy = 2;
+        gbcPromotionRateLabel.anchor = GridBagConstraints.WEST; // Căn trái
+        gbcPromotionRateLabel.insets = new Insets(5, 10, 5, 5); // Khoảng cách giữa các thành phần
+        rightSubPanel2.add(promotionRateLabel, gbcPromotionRateLabel);
+        GridBagConstraints gbcPromotionRateField = new GridBagConstraints();
+        gbcPromotionRateField.gridx = 1;
+        gbcPromotionRateField.gridy = 2;
+        gbcPromotionRateField.fill = GridBagConstraints.HORIZONTAL; // Giãn theo chiều ngang
+        gbcPromotionRateField.weightx = 1.0; // Độ rộng linh hoạt
+        gbcPromotionRateField.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
+        rightSubPanel2.add(promotionRateField, gbcPromotionRateField);
+
+        // Label cho Ngày bắt đầu
+        JLabel startDateLabel = new JLabel("Ngày bắt đầu:");
+        startDateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        GridBagConstraints gbcStartDateLabel = new GridBagConstraints();
+        gbcStartDateLabel.gridx = 0;
+        gbcStartDateLabel.gridy = 3;
+        gbcStartDateLabel.anchor = GridBagConstraints.WEST; // Căn trái
+        gbcStartDateLabel.insets = new Insets(5, 10, 5, 5); // Khoảng cách giữa các thành phần
+        rightSubPanel2.add(startDateLabel, gbcStartDateLabel);
+
+        // JDateChooser cho Ngày bắt đầu
+        JDateChooser startDateChooser = new JDateChooser();
+        startDateChooser.setPreferredSize(new Dimension(200, 25));
+        GridBagConstraints gbcStartDateChooser = new GridBagConstraints();
+        gbcStartDateChooser.gridx = 1;
+        gbcStartDateChooser.gridy = 3;
+        gbcStartDateChooser.fill = GridBagConstraints.HORIZONTAL;
+        gbcStartDateChooser.weightx = 1.0;
+        gbcStartDateChooser.insets = new Insets(5, 5, 5, 10);
+        rightSubPanel2.add(startDateChooser, gbcStartDateChooser);
+
+        // Label cho Ngày kết thúc
+        JLabel endDateLabel = new JLabel("Ngày kết thúc:");
+        endDateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        GridBagConstraints gbcEndDateLabel = new GridBagConstraints();
+        gbcEndDateLabel.gridx = 0;
+        gbcEndDateLabel.gridy = 4;
+        gbcEndDateLabel.anchor = GridBagConstraints.WEST; // Căn trái
+        gbcEndDateLabel.insets = new Insets(5, 10, 10, 5); // Khoảng cách giữa các thành phần
+        rightSubPanel2.add(endDateLabel, gbcEndDateLabel);
+
+        // JDateChooser cho Ngày kết thúc
+        JDateChooser endDateChooser = new JDateChooser();
+        endDateChooser.setPreferredSize(new Dimension(200, 25));
+        GridBagConstraints gbcEndDateChooser = new GridBagConstraints();
+        gbcEndDateChooser.gridx = 1;
+        gbcEndDateChooser.gridy = 4;
+        gbcEndDateChooser.fill = GridBagConstraints.HORIZONTAL;
+        gbcEndDateChooser.weightx = 1.0;
+        gbcEndDateChooser.insets = new Insets(5, 5, 10, 10);
+        rightSubPanel2.add(endDateChooser, gbcEndDateChooser);
 
         GridBagConstraints gbcRightSubPanel2 = new GridBagConstraints();
         gbcRightSubPanel2.gridx = 0;
@@ -322,6 +317,31 @@ public class PromotionPanel extends JPanel {
         JButton addButton = new JButton("Add");
         addButton.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Add"
         rightSubPanel3.add(addButton);
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Lấy dữ liệu từ các trường nhập liệu
+                String productID = productIDField.getText();
+                String supplierID = supplierIDField.getText();
+                double promotionRate = Double.parseDouble(promotionRateField.getText());
+             // Lấy ngày tháng được chọn từ JDateChooser
+                java.util.Date startDateUtil = startDateChooser.getDate();
+                java.util.Date endDateUtil = endDateChooser.getDate();
+
+                // Chuyển đổi sang kiểu java.sql.Date
+                java.sql.Date startDate = new java.sql.Date(startDateUtil.getTime());
+                java.sql.Date endDate = new java.sql.Date(endDateUtil.getTime());
+                // Tạo đối tượng Promotion từ dữ liệu nhập liệu
+                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+
+                // Gọi phương thức addPromotion với đối tượng Promotion được tạo
+                try {
+                    productManager.addPromotion(promotion);
+                } catch (RemoteException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
 
         // Sử dụng FlowLayout và đặt alignment cho nút là CENTER
         FlowLayout flowLayout = new FlowLayout(FlowLayout.CENTER);
@@ -348,93 +368,4 @@ public class PromotionPanel extends JPanel {
     public Dimension getPreferredSize() {
         return new Dimension(800, 600); // Kích thước mặc định
     }
-    
-    // Phương thức để tạo và điền dữ liệu vào bảng
-    private void displayProductTable(JPanel panel) {
-        // Lấy dữ liệu từ đối tượng phân tán
-        List<Product> productList;
-        try {
-            productList = productManager.getProducts();
-        } catch (RemoteException e) {
-            e.printStackTrace(); // Xử lý ngoại lệ nếu cần thiết
-            return;
-        }
-
-        // Chuyển đổi dữ liệu thành mảng 2 chiều
-        String[][] data = new String[productList.size()][6];
-        for (int i = 0; i < productList.size(); i++) {
-            Product product = productList.get(i);
-            data[i][0] = product.getProductID();
-            data[i][1] = product.getProductName();
-            data[i][2] = String.valueOf(product.getPrice());
-            data[i][3] = String.valueOf(product.getQuantity());
-            data[i][4] = product.getDescription();
-            data[i][5] = product.getSupplierID();
-        }
-
-        // Tiêu đề cột
-        String[] columnNames = {"Product ID", "Product Name", "Price", "Quantity", "Description", "Supplier ID"};
-
-        // Tạo bảng hiển thị dữ liệu
-        JTable table = new JTable(data, columnNames);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
-        JScrollPane scrollPaneTable = new JScrollPane(table);
-        scrollPaneTable.setViewportBorder(null);
-        panel.add(scrollPaneTable, BorderLayout.CENTER); // Thêm scrollPane vào vị trí CENTER của panel
-
-        // Customize header
-        JTableHeader header = table.getTableHeader();
-        header.setBackground(Color.BLUE); // Set header background color
-        header.setForeground(Color.WHITE); // Set header text color
-
-        // Get the current font
-        Font currentFont = header.getFont();
-        // Derive a new font with size 18 and bold style
-        Font newFont = currentFont.deriveFont(Font.BOLD, 18f);
-        // Set the new font for the header
-        header.setFont(newFont);
-    }
-    private void updateTable(List<Product> productList, JPanel panel) {
-        // Xóa bảng hiện tại khỏi panel
-        panel.removeAll();
-
-        // Chuyển đổi dữ liệu thành mảng 2 chiều
-        String[][] data = new String[productList.size()][6];
-        for (int i = 0; i < productList.size(); i++) {
-            Product product = productList.get(i);
-            data[i][0] = product.getProductID();
-            data[i][1] = product.getProductName();
-            data[i][2] = String.valueOf(product.getPrice());
-            data[i][3] = String.valueOf(product.getQuantity());
-            data[i][4] = product.getDescription();
-            data[i][5] = product.getSupplierID();
-        }
-
-        // Tiêu đề cột
-        String[] columnNames = {"Product ID", "Product Name", "Price", "Quantity", "Description", "Supplier ID"};
-
-        // Tạo bảng mới
-        JTable table = new JTable(data, columnNames);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
-        JScrollPane scrollPaneTable = new JScrollPane(table);
-        scrollPaneTable.setViewportBorder(null);
-
-        // Customize header
-        JTableHeader header = table.getTableHeader();
-        header.setBackground(Color.BLUE); // Set header background color
-        header.setForeground(Color.WHITE); // Set header text color
-        Font currentFont = header.getFont();
-        Font newFont = currentFont.deriveFont(Font.BOLD, 18f);
-        header.setFont(newFont);
-
-        // Thêm bảng mới vào panel
-        panel.add(scrollPaneTable, BorderLayout.CENTER);
-
-        // Cập nhật lại panel
-        panel.revalidate();
-        panel.repaint();
-    }
-
 }

@@ -133,40 +133,40 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	        }
 	    }
 
-	@Override
-	public List<Product> sortProductsQuantityASC() throws RemoteException {
-		return queryProcessor.sortProductQuantityASC();
-	}
-
-	@Override
-	public List<Product> sortProductsPriceASC() throws RemoteException {
-		return queryProcessor.sortProductPriceASC();
-	}
-
-	@Override
-	public List<Product> sortProductsQuantityDESC() throws RemoteException {
-		return queryProcessor.sortProductQuantityDESC();
-	}
-
-	@Override
-	public List<Product> sortProductsPriceDESC() throws RemoteException {
-		return queryProcessor.sortProductPriceDESC();
-	}
+//	@Override
+//	public List<Product> sortProductsQuantityASC() throws RemoteException {
+//		return queryProcessor.sortProductQuantityASC();
+//	}
+//
+//	@Override
+//	public List<Product> sortProductsPriceASC() throws RemoteException {
+//		return queryProcessor.sortProductPriceASC();
+//	}
+//
+//	@Override
+//	public List<Product> sortProductsQuantityDESC() throws RemoteException {
+//		return queryProcessor.sortProductQuantityDESC();
+//	}
+//
+//	@Override
+//	public List<Product> sortProductsPriceDESC() throws RemoteException {
+//		return queryProcessor.sortProductPriceDESC();
+//	}
 
 	@Override
 	public List<Invoice> searchInvoice(String invoiceID) throws RemoteException {
 		return queryProcessor.searchInvoice(invoiceID);
 	}
 
-	@Override
-	public List<Promotion> sortPromotionsDateASC() throws RemoteException {
-		return queryProcessor.sortPromotionsDateASC();
-	}
-
-	@Override
-	public List<Promotion> sortPromotionsDateDESC() throws RemoteException {
-		return queryProcessor.sortPromotionsDateDESC();
-	}
+//	@Override
+//	public List<Promotion> sortPromotionsDateASC() throws RemoteException {
+//		return queryProcessor.sortPromotionsDateASC();
+//	}
+//
+//	@Override
+//	public List<Promotion> sortPromotionsDateDESC() throws RemoteException {
+//		return queryProcessor.sortPromotionsDateDESC();
+//	}
 
 	@Override
 	public List<Invoice> sortInvoicePriceASC() throws RemoteException {
@@ -191,5 +191,15 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	}
 	public List<Product> sortProductsByQuantityDescending(List<Product> productList) throws RemoteException{
 		return queryProcessor.sortProductsByQuantityDescending(productList);
+	}
+
+	@Override
+	public List<Promotion> sortPromotionDateDescending(List<Promotion> productList) throws RemoteException {
+		return queryProcessor.sortPromotionDateDescending(productList);
+	}
+
+	@Override
+	public List<Promotion> sortPromotionDateAscending(List<Promotion> productList) throws RemoteException {
+		return queryProcessor.sortPromotionDateAscending(productList);
 	}
 }

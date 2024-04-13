@@ -43,19 +43,22 @@ public interface interfaceProductManager extends Remote {
     public List<InvoiceDetail> searchInvoiceDetails(String invoiceID) throws RemoteException;
     public List<Invoice> searchInvoice(String invoiceID) throws RemoteException;
     
-    // Chức năng sắp xếp sản phẩm
-    public List<Product> sortProductsQuantityASC() throws RemoteException;
-    public List<Product> sortProductsPriceASC() throws RemoteException;
-    public List<Product> sortProductsQuantityDESC() throws RemoteException;
-    public List<Product> sortProductsPriceDESC() throws RemoteException;
-    
+//    // Chức năng sắp xếp sản phẩm
+//    public List<Product> sortProductsQuantityASC() throws RemoteException;
+//    public List<Product> sortProductsPriceASC() throws RemoteException;
+//    public List<Product> sortProductsQuantityDESC() throws RemoteException;
+//    public List<Product> sortProductsPriceDESC() throws RemoteException;
+//    
     public List<Product> sortProductsByPriceAscending(List<Product> productList) throws RemoteException;
     public List<Product> sortProductsByPriceDescending(List<Product> productList) throws RemoteException;
     public List<Product> sortProductsByQuantityAscending(List<Product> productList)throws RemoteException;
     public List<Product> sortProductsByQuantityDescending(List<Product> productList)throws RemoteException;
     // Chức năng sắp xếp khuyến mãi theo ngày
-    public List<Promotion> sortPromotionsDateASC() throws RemoteException;
-    public List<Promotion> sortPromotionsDateDESC() throws RemoteException;
+//    public List<Promotion> sortPromotionsDateASC() throws RemoteException;
+//    public List<Promotion> sortPromotionsDateDESC() throws RemoteException;
+    
+    public List<Promotion> sortPromotionDateDescending(List<Promotion> promotionList)throws RemoteException;
+    public List<Promotion> sortPromotionDateAscending(List<Promotion> promotionList)throws RemoteException;
     // Chức năng sắp xếp hóa đơn theo đơn giá
     public List<Invoice> sortInvoicePriceASC() throws RemoteException;
     public List<Invoice> sortInvoicePriceDESC() throws RemoteException;

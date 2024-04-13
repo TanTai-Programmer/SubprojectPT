@@ -43,8 +43,9 @@ public class QueryProcessingDB {
             statement.setString(1, promotion.getProductID());
             statement.setString(2, promotion.getSupplierID());
             statement.setDouble(3, promotion.getPromotionRate());
-            statement.setDate(4, new java.sql.Date(promotion.getStartDate().getTime()));
-            statement.setDate(5, new java.sql.Date(promotion.getEndDate().getTime()));
+            statement.setTimestamp(4, new java.sql.Timestamp(promotion.getStartDate().getTime()));
+            statement.setTimestamp(5, new java.sql.Timestamp(promotion.getEndDate().getTime()));
+
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -367,116 +368,140 @@ public class QueryProcessingDB {
         return productList;
     }
 
-    public List<Product> sortProductQuantityASC() {
-        List<Product> products = new ArrayList<>();
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY quantity ASC;")) {
-            while (resultSet.next()) {
-                String productID = resultSet.getString("productid");
-                String productName = resultSet.getString("productname");
-                double price = resultSet.getDouble("price");
-                int quantity = resultSet.getInt("quantity");
-                String description = resultSet.getString("description");
-                String supplierID = resultSet.getString("supplierid");
-                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+//    public List<Product> sortProductQuantityASC() {
+//        List<Product> products = new ArrayList<>();
+//        try (Statement statement = connection.createStatement();
+//             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY quantity ASC;")) {
+//            while (resultSet.next()) {
+//                String productID = resultSet.getString("productid");
+//                String productName = resultSet.getString("productname");
+//                double price = resultSet.getDouble("price");
+//                int quantity = resultSet.getInt("quantity");
+//                String description = resultSet.getString("description");
+//                String supplierID = resultSet.getString("supplierid");
+//                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return products;
+//    }
+//    public List<Product> sortProductPriceASC() {
+//        List<Product> products = new ArrayList<>();
+//        try (Statement statement = connection.createStatement();
+//             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY price ASC;")) {
+//            while (resultSet.next()) {
+//                String productID = resultSet.getString("productid");
+//                String productName = resultSet.getString("productname");
+//                double price = resultSet.getDouble("price");
+//                int quantity = resultSet.getInt("quantity");
+//                String description = resultSet.getString("description");
+//                String supplierID = resultSet.getString("supplierid");
+//                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return products;
+//    }
+//    public List<Product> sortProductQuantityDESC() {
+//        List<Product> products = new ArrayList<>();
+//        try (Statement statement = connection.createStatement();
+//             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY quantity DESc;")) {
+//            while (resultSet.next()) {
+//                String productID = resultSet.getString("productid");
+//                String productName = resultSet.getString("productname");
+//                double price = resultSet.getDouble("price");
+//                int quantity = resultSet.getInt("quantity");
+//                String description = resultSet.getString("description");
+//                String supplierID = resultSet.getString("supplierid");
+//                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return products;
+//    }
+//    public List<Product> sortProductPriceDESC() {
+//        List<Product> products = new ArrayList<>();
+//        try (Statement statement = connection.createStatement();
+//             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY price DESC;")) {
+//            while (resultSet.next()) {
+//                String productID = resultSet.getString("productid");
+//                String productName = resultSet.getString("productname");
+//                double price = resultSet.getDouble("price");
+//                int quantity = resultSet.getInt("quantity");
+//                String description = resultSet.getString("description");
+//                String supplierID = resultSet.getString("supplierid");
+//                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return products;
+//    }
+    
+    // Phương thức sắp xếp danh sách Promotion theo số lượng giảm dần
+    public List<Promotion> sortPromotionDateAscending(List<Promotion> promotionList){
+        // Sắp xếp danh sách Promotion theo ngày tăng dần
+        Collections.sort(promotionList, new Comparator<Promotion>() {
+            @Override
+            public int compare(Promotion p1, Promotion p2) {
+                // So sánh ngày bắt đầu
+                return p1.getStartDate().compareTo(p2.getStartDate());
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return products;
+        });
+        return promotionList;
     }
-    public List<Product> sortProductPriceASC() {
-        List<Product> products = new ArrayList<>();
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY price ASC;")) {
-            while (resultSet.next()) {
-                String productID = resultSet.getString("productid");
-                String productName = resultSet.getString("productname");
-                double price = resultSet.getDouble("price");
-                int quantity = resultSet.getInt("quantity");
-                String description = resultSet.getString("description");
-                String supplierID = resultSet.getString("supplierid");
-                products.add(new Product(productID, productName, price, quantity, description, supplierID));
+    public List<Promotion> sortPromotionDateDescending(List<Promotion> promotionList) {
+        // Sắp xếp danh sách Promotion theo ngày giảm dần
+        Collections.sort(promotionList, new Comparator<Promotion>() {
+            @Override
+            public int compare(Promotion p1, Promotion p2) {
+                // So sánh ngày bắt đầu
+                return p2.getStartDate().compareTo(p1.getStartDate());
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return products;
+        });
+        return promotionList;
     }
-    public List<Product> sortProductQuantityDESC() {
-        List<Product> products = new ArrayList<>();
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY quantity DESc;")) {
-            while (resultSet.next()) {
-                String productID = resultSet.getString("productid");
-                String productName = resultSet.getString("productname");
-                double price = resultSet.getDouble("price");
-                int quantity = resultSet.getInt("quantity");
-                String description = resultSet.getString("description");
-                String supplierID = resultSet.getString("supplierid");
-                products.add(new Product(productID, productName, price, quantity, description, supplierID));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return products;
-    }
-    public List<Product> sortProductPriceDESC() {
-        List<Product> products = new ArrayList<>();
-        try (Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM product ORDER BY price DESC;")) {
-            while (resultSet.next()) {
-                String productID = resultSet.getString("productid");
-                String productName = resultSet.getString("productname");
-                double price = resultSet.getDouble("price");
-                int quantity = resultSet.getInt("quantity");
-                String description = resultSet.getString("description");
-                String supplierID = resultSet.getString("supplierid");
-                products.add(new Product(productID, productName, price, quantity, description, supplierID));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return products;
-    }
-    public List<Promotion> sortPromotionsDateASC() {
-        List<Promotion> promotions = new ArrayList<>();
-        String query = "SELECT * FROM `promotion` ORDER BY `promotion`.`startdate` ASC";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                String productID = resultSet.getString("productid");
-                String supplierID = resultSet.getString("supplierid");
-                double promotionRate = resultSet.getDouble("promotionrate");
-                Date startDate = resultSet.getDate("startdate");
-                Date endDate = resultSet.getDate("enddate");
-                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
-                promotions.add(promotion);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return promotions;
-    }
-    public List<Promotion> sortPromotionsDateDESC() {
-        List<Promotion> promotions = new ArrayList<>();
-        String query = "SELECT * FROM `promotion` ORDER BY `promotion`.`startdate` DESC";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                String productID = resultSet.getString("productid");
-                String supplierID = resultSet.getString("supplierid");
-                double promotionRate = resultSet.getDouble("promotionrate");
-                Date startDate = resultSet.getDate("startdate");
-                Date endDate = resultSet.getDate("enddate");
-                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
-                promotions.add(promotion);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return promotions;
-    }
+//    public List<Promotion> sortPromotionsDateASC() {
+//        List<Promotion> promotions = new ArrayList<>();
+//        String query = "SELECT * FROM `promotion` ORDER BY `promotion`.`startdate` ASC";
+//        try (PreparedStatement statement = connection.prepareStatement(query)) {
+//            ResultSet resultSet = statement.executeQuery();
+//            while (resultSet.next()) {
+//                String productID = resultSet.getString("productid");
+//                String supplierID = resultSet.getString("supplierid");
+//                double promotionRate = resultSet.getDouble("promotionrate");
+//                Date startDate = resultSet.getDate("startdate");
+//                Date endDate = resultSet.getDate("enddate");
+//                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+//                promotions.add(promotion);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return promotions;
+//    }
+//    public List<Promotion> sortPromotionsDateDESC() {
+//        List<Promotion> promotions = new ArrayList<>();
+//        String query = "SELECT * FROM `promotion` ORDER BY `promotion`.`startdate` DESC";
+//        try (PreparedStatement statement = connection.prepareStatement(query)) {
+//            ResultSet resultSet = statement.executeQuery();
+//            while (resultSet.next()) {
+//                String productID = resultSet.getString("productid");
+//                String supplierID = resultSet.getString("supplierid");
+//                double promotionRate = resultSet.getDouble("promotionrate");
+//                Date startDate = resultSet.getDate("startdate");
+//                Date endDate = resultSet.getDate("enddate");
+//                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+//                promotions.add(promotion);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return promotions;
+//    }
     public List<Invoice> sortInvoicePriceASC() {
         List<Invoice> invoices = new ArrayList<>();
         String query = "SELECT * FROM `invoice` ORDER BY `invoice`.`totalamount` ASC";
