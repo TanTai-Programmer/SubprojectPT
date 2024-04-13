@@ -441,7 +441,7 @@ public class QueryProcessingDB {
 //        return products;
 //    }
     
-    // Phương thức sắp xếp danh sách Promotion theo số lượng giảm dần
+    // Phương thức sắp xếp danh sách Promotion theo ngày tăng dần
     public List<Promotion> sortPromotionDateAscending(List<Promotion> promotionList){
         // Sắp xếp danh sách Promotion theo ngày tăng dần
         Collections.sort(promotionList, new Comparator<Promotion>() {

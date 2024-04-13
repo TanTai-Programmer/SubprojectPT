@@ -78,7 +78,6 @@ public class ProductPanel extends JPanel {
 		           // Cập nhật bảng hiển thị dữ liệu với kết quả tìm kiếm
 	            updateTable(productResult, leftSubPanel2);
 			} catch (RemoteException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
         });
@@ -99,11 +98,11 @@ public class ProductPanel extends JPanel {
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 } else if (selectedOption.equals("Số lượng giảm dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsByQuantityAscending(productResult);
+                    List<Product> sortedProducts = productManager.sortProductsByQuantityDescending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 }else if (selectedOption.equals("Số lượng tăng dần")) {
-                    List<Product> sortedProducts = productManager.sortProductsByQuantityDescending(productResult);
+                    List<Product> sortedProducts = productManager.sortProductsByQuantityAscending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 }
@@ -169,6 +168,7 @@ public class ProductPanel extends JPanel {
             // Sau khi cập nhật, bạn có thể làm các công việc khác như cập nhật lại bảng
         });
 
+        
         // Nút "Delete"
         JButton btnNewButton_1 = new JButton("Delete");
         btnNewButton_1.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Delete"
@@ -689,8 +689,6 @@ public class ProductPanel extends JPanel {
         supplierIDField.setText(supplierID);
         gbc.gridx = 1;
         editPanel.add(supplierIDField, gbc);
-
-        // Tạo các thành phần cho các trường dữ liệu khác tương tự
 
         // Thêm nút "Lưu"
         JButton saveButton = new JButton("Lưu");

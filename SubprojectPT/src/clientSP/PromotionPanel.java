@@ -7,7 +7,6 @@ import javax.swing.table.TableModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import interfaceQLSP.interfaceProductManager;
 import objectQLSP.Promotion;
@@ -18,7 +17,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
-import java.sql.Date;
 
 import com.toedter.calendar.JDateChooser;
 public class PromotionPanel extends JPanel {
@@ -76,12 +74,41 @@ public class PromotionPanel extends JPanel {
         gbcSearchButton.anchor = GridBagConstraints.WEST; // Căn trái
         gbcSearchButton.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
         leftSubPanel1.add(searchButton, gbcSearchButton);
-        
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Lấy từ khoá tìm kiếm từ trường nhập liệu
+                String keyword = searchField.getText();
+				try {
+					promotionResult = productManager.searchPromotions(keyword);
+					updateTable(promotionResult, leftSubPanel2);
+				} catch (RemoteException e1) {
+					e1.printStackTrace();
+				}
+            }
+        });
         // ComboBox có 4 tùy chọn
         String[] options = {"Ngày tạo gần nhất", "Ngày tạo xa nhất"};
         JComboBox<String> comboBox = new JComboBox<>(options);
         comboBox.setFont(new Font("Tahoma", Font.PLAIN, 16));
-
+        comboBox.addActionListener(e -> {
+            String selectedOption = (String) comboBox.getSelectedItem();
+            try {
+				if (selectedOption.equals("Ngày tạo gần nhất")) {
+                    List<Promotion> sortedPromotion = productManager.sortPromotionDateDescending(promotionResult);
+                    // Gọi phương thức để sử dụng sortedProducts
+                    updateTable(sortedPromotion,leftSubPanel2);
+                } else if (selectedOption.equals("Ngày tạo xa nhất")) {
+                    List<Promotion> sortedPromotion = productManager.sortPromotionDateAscending(promotionResult);
+                    // Gọi phương thức để sử dụng sortedProducts
+                    updateTable(sortedPromotion,leftSubPanel2);
+                }
+                // Xử lý các lựa chọn khác nếu cần
+            } catch (RemoteException ex) {
+                ex.printStackTrace();
+                // Xử lý ngoại lệ nếu cần
+            }
+        });
         GridBagConstraints gbcComboBox = new GridBagConstraints();
         gbcComboBox.gridx = 0;
         gbcComboBox.gridy = 1;
@@ -103,7 +130,7 @@ public class PromotionPanel extends JPanel {
         // Panel con 2
         leftSubPanel2 = new JPanel();
         leftSubPanel2.setLayout(new BorderLayout()); // Sử dụng BorderLayout
-
+        displayPromotionTable(leftSubPanel2);
         
         GridBagConstraints gbcLeftSubPanel2 = new GridBagConstraints();
         gbcLeftSubPanel2.gridx = 0;
@@ -119,6 +146,23 @@ public class PromotionPanel extends JPanel {
         JButton btnNewButton = new JButton("Update");
         btnNewButton.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Update"
         leftSubPanel3.add(btnNewButton);
+     // Xử lý sự kiện cho nút "Update"
+        btnNewButton.addActionListener(e -> {
+            // Lặp qua danh sách các đối tượng Promotion đã chỉnh sửa
+            for (Promotion editedPromotions : editedPromotion) {
+                // Cập nhật thông tin của đối tượng Promotion lên server từ xa
+                try {
+                    productManager.updatePromotion(editedPromotions);
+                    updateTable(promotionResult,leftSubPanel2);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            // Xóa danh sách các đối tượng Promotion đã chỉnh sửa sau khi cập nhật thành công
+            editedPromotion.clear();
+            // Sau khi cập nhật, bạn có thể làm các công việc khác như cập nhật lại bảng
+        });
+        
         // Nút "Delete"
         JButton btnNewButton_1 = new JButton("Delete");
         btnNewButton_1.setPreferredSize(new Dimension(120, 40)); // Thiết lập kích thước ưu tiên cho nút "Delete"
@@ -129,26 +173,26 @@ public class PromotionPanel extends JPanel {
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
                 // Kiểm tra xem người dùng đã chọn một dòng trong bảng chưa
-                JOptionPane.showMessageDialog(null, "Vui lòng chọn một sản phẩm để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Vui lòng chọn một khuyến mãi để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             // Lấy ID của sản phẩm từ dòng được chọn
             String productID = table.getValueAt(selectedRow, 0).toString();
-
+            String promotionID = table.getValueAt(selectedRow, 1).toString();
             // Gọi phương thức deleteProduct từ xa với ID của sản phẩm
             try {
-                productManager.deleteProduct(productID);
+                productManager.deletePromotion(productID, promotionID);
                 // Xóa sản phẩm từ bảng dữ liệu
                 DefaultTableModel model = (DefaultTableModel) table.getModel();
                 model.removeRow(selectedRow); // Xóa dòng tương ứng từ bảng
 
                 // Hiển thị thông báo thành công (nếu cần)
-                JOptionPane.showMessageDialog(null, "Đã xóa sản phẩm thành công.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Đã xóa khuyến mãi thành công.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             } catch (RemoteException ex) {
                 ex.printStackTrace();
                 // Xử lý ngoại lệ khi gặp lỗi khi gọi phương thức từ xa
-                JOptionPane.showMessageDialog(null, "Lỗi khi xóa sản phẩm.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Lỗi khi xóa khuyến mãi.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -221,7 +265,7 @@ public class PromotionPanel extends JPanel {
         rightSubPanel2.add(productIDField, gbcProductIDField);
 
         // Label và TextField cho Mã nhà cung cấp
-        JLabel supplierIDLabel = new JLabel("Mã nhà cung cấp:");
+        JLabel supplierIDLabel = new JLabel("Supplier ID:");
         supplierIDLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         JTextField supplierIDField = new JTextField(20); // Số ký tự mặc định
         supplierIDField.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -241,7 +285,7 @@ public class PromotionPanel extends JPanel {
         rightSubPanel2.add(supplierIDField, gbcSupplierIDField);
 
         // Label và TextField cho Phần trăm khuyến mãi
-        JLabel promotionRateLabel = new JLabel("Phần trăm khuyến mãi:");
+        JLabel promotionRateLabel = new JLabel("Tỉ lệ khuyến mãi:");
         promotionRateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         JTextField promotionRateField = new JTextField(20); // Số ký tự mặc định
         promotionRateField.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -337,6 +381,13 @@ public class PromotionPanel extends JPanel {
                 // Gọi phương thức addPromotion với đối tượng Promotion được tạo
                 try {
                     productManager.addPromotion(promotion);
+                    updatePromotionTable();
+                    // Xóa dữ liệu trong các trường nhập liệu sau khi thêm promotion thành công
+                    productIDField.setText("");
+                    supplierIDField.setText("");
+                    promotionRateField.setText("");
+                    startDateChooser.setDate(null);
+                    endDateChooser.setDate(null);
                 } catch (RemoteException e1) {
                     e1.printStackTrace();
                 }
@@ -367,5 +418,327 @@ public class PromotionPanel extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(800, 600); // Kích thước mặc định
+    }
+    private void displayPromotionTable(JPanel panel) {
+        // Lấy dữ liệu từ đối tượng phân tán
+        try {
+            promotionResult = productManager.getPromotions();
+        } catch (RemoteException e) {
+            e.printStackTrace(); // Xử lý ngoại lệ nếu cần thiết
+            return;
+        }
+
+        // Chuyển đổi dữ liệu thành mảng 2 chiều
+        String[][] data = new String[promotionResult.size()][5];
+        for (int i = 0; i < promotionResult.size(); i++) {
+            Promotion promotion = promotionResult.get(i);
+            data[i][0] = promotion.getProductID();
+            data[i][1] = promotion.getSupplierID();
+            data[i][2] = String.valueOf(promotion.getPromotionRate());
+            data[i][3] = promotion.getStartDate().toString();
+            data[i][4] = promotion.getEndDate().toString();
+        }
+
+        // Tiêu đề cột
+        String[] columnNames = {"Product ID", "Supplier ID", "Promotion Rate", "Start Date", "End Date"};
+
+        // Tạo bảng hiển thị dữ liệu
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            /**
+             * 
+             */
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Không cho phép chỉnh sửa trực tiếp
+            }
+        };
+        table = new JTable(model);
+        table.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
+        JScrollPane scrollPaneTable = new JScrollPane(table);
+        scrollPaneTable.setViewportBorder(null);
+        panel.add(scrollPaneTable, BorderLayout.CENTER); // Thêm scrollPane vào vị trí CENTER của panel
+
+        // Customize header
+        JTableHeader header = table.getTableHeader();
+        header.setBackground(Color.BLUE); // Set header background color
+        header.setForeground(Color.WHITE); // Set header text color
+
+        // Get the current font
+        Font currentFont = header.getFont();
+        // Derive a new font with size 18 and bold style
+        Font newFont = currentFont.deriveFont(Font.BOLD, 18f);
+        // Set the new font for the header
+        header.setFont(newFont);
+        // Sự kiện lắng nghe cho bảng
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Kiểm tra xem người dùng đã nhấn đúp chuột hay chưa
+                if (e.getClickCount() == 2) {
+                	// Lấy chỉ số hàng của dòng được chọn
+                	int row = table.getSelectedRow();
+                	// Lấy dữ liệu từ mô hình bảng
+                	TableModel model = table.getModel();
+                	// Lấy dữ liệu từ các cột của dòng được chọn
+                	String productID = model.getValueAt(row, 0).toString();
+                	String supplierID = model.getValueAt(row, 1).toString();
+                	String promotionRate = model.getValueAt(row, 2).toString();
+
+                	// Chuyển đổi kiểu dữ liệu của startDate từ String sang java.sql.Date và sau đó thành java.util.Date
+                	String startDateString = model.getValueAt(row, 3).toString();
+                	java.sql.Date startDateSQL = java.sql.Date.valueOf(startDateString);
+                	java.util.Date startDate = new java.util.Date(startDateSQL.getTime());
+
+                	// Tương tự cho endDate
+                	String endDateString = model.getValueAt(row, 4).toString();
+                	java.sql.Date endDateSQL = java.sql.Date.valueOf(endDateString);
+                	java.util.Date endDate = new java.util.Date(endDateSQL.getTime());
+
+                	// Hiển thị cửa sổ nổi để chỉnh sửa thông tin
+                	showEditWindow(productID, supplierID, promotionRate, startDate, endDate, row);
+                }
+            }
+        });
+    }
+    private void updatePromotionTable() {
+        try {
+            // Lấy danh sách khuyến mại mới nhất từ ProductManager
+            promotionResult = productManager.getPromotions();
+
+            // Cập nhật bảng hiển thị với danh sách khuyến mại mới
+            updateTable(promotionResult, leftSubPanel2);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+            // Xử lý ngoại lệ nếu cần
+        }
+    }
+
+    private void updateTable(List<Promotion> promotionList, JPanel panel) {
+        // Xóa bảng hiện tại khỏi panel
+        panel.removeAll();
+
+        // Chuyển đổi dữ liệu thành mảng 2 chiều
+        String[][] data = new String[promotionList.size()][5];
+        for (int i = 0; i < promotionList.size(); i++) {
+            Promotion promotion = promotionList.get(i);
+            data[i][0] = promotion.getProductID();
+            data[i][1] = promotion.getSupplierID();
+            data[i][2] = String.valueOf(promotion.getPromotionRate());
+            data[i][3] = promotion.getStartDate().toString();
+            data[i][4] = promotion.getEndDate().toString();
+        }
+
+        // Tiêu đề cột
+        String[] columnNames = {"Product ID", "Supplier ID", "Promotion Rate", "Start Date", "End Date"};
+
+        // Tạo bảng hiển thị dữ liệu
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Không cho phép chỉnh sửa trực tiếp
+            }
+        };
+        JTable table = new JTable(model);
+        table.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
+        JScrollPane scrollPaneTable = new JScrollPane(table);
+        scrollPaneTable.setViewportBorder(null);
+        panel.add(scrollPaneTable, BorderLayout.CENTER); // Thêm scrollPane vào vị trí CENTER của panel
+
+        // Customize header
+        JTableHeader header = table.getTableHeader();
+        header.setBackground(Color.BLUE); // Set header background color
+        header.setForeground(Color.WHITE); // Set header text color
+        Font currentFont = header.getFont();
+        Font newFont = currentFont.deriveFont(Font.BOLD, 18f);
+        header.setFont(newFont);
+
+        // Thêm bảng mới vào panel
+        panel.add(scrollPaneTable, BorderLayout.CENTER);
+
+        // Cập nhật lại panel
+        panel.revalidate();
+        panel.repaint();
+        // Sự kiện lắng nghe cho bảng
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Kiểm tra xem người dùng đã nhấn đúp chuột hay chưa
+                if (e.getClickCount() == 2) {
+                	// Lấy chỉ số hàng của dòng được chọn
+                	int row = table.getSelectedRow();
+                	// Lấy dữ liệu từ mô hình bảng
+                	TableModel model = table.getModel();
+                	// Lấy dữ liệu từ các cột của dòng được chọn
+                	String productID = model.getValueAt(row, 0).toString();
+                	String supplierID = model.getValueAt(row, 1).toString();
+                	String promotionRate = model.getValueAt(row, 2).toString();
+
+                	// Chuyển đổi kiểu dữ liệu của startDate từ String sang java.sql.Date và sau đó thành java.util.Date
+                	String startDateString = model.getValueAt(row, 3).toString();
+                	java.sql.Date startDateSQL = java.sql.Date.valueOf(startDateString);
+                	java.util.Date startDate = new java.util.Date(startDateSQL.getTime());
+
+                	// Tương tự cho endDate
+                	String endDateString = model.getValueAt(row, 4).toString();
+                	java.sql.Date endDateSQL = java.sql.Date.valueOf(endDateString);
+                	java.util.Date endDate = new java.util.Date(endDateSQL.getTime());
+
+                	// Hiển thị cửa sổ nổi để chỉnh sửa thông tin
+                	showEditWindow(productID, supplierID, promotionRate, startDate, endDate, row);
+                }
+            }
+        });
+    }
+    private void showEditWindow(String productID, String supplierID, String promotionRate, java.util.Date startDate, java.util.Date endDate, int row) {
+        // Tạo cửa sổ nổi
+        JFrame editFrame = new JFrame("Edit Promotion");
+
+        // Tạo panel chứa các trường nhập dữ liệu
+        JPanel editPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        // Label và TextField cho Product ID
+        JLabel productIDLabel = new JLabel("Product ID:");
+        productIDLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        editPanel.add(productIDLabel, gbc);
+
+        JTextField productIDField = new JTextField(20);
+        productIDField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        productIDField.setText(productID);
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        editPanel.add(productIDField, gbc);
+
+        // Label và TextField cho Supplier ID
+        JLabel supplierIDLabel = new JLabel("Supplier ID:");
+        supplierIDLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        editPanel.add(supplierIDLabel, gbc);
+
+        JTextField supplierIDField = new JTextField(20);
+        supplierIDField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        supplierIDField.setText(supplierID);
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        editPanel.add(supplierIDField, gbc);
+
+        // Label và TextField cho Promotion Rate
+        JLabel promotionRateLabel = new JLabel("Promotion Rate:");
+        promotionRateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        editPanel.add(promotionRateLabel, gbc);
+
+        JTextField promotionRateField = new JTextField(20);
+        promotionRateField.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        promotionRateField.setText(promotionRate);
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        editPanel.add(promotionRateField, gbc);
+
+        // Label và JDateChooser cho Start Date
+        JLabel startDateLabel = new JLabel("Start Date:");
+        startDateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        editPanel.add(startDateLabel, gbc);
+
+        JDateChooser startDateChooser = new JDateChooser(startDate);
+        startDateChooser.setPreferredSize(new Dimension(200, 25));
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        editPanel.add(startDateChooser, gbc);
+
+        // Label và JDateChooser cho End Date
+        JLabel endDateLabel = new JLabel("End Date:");
+        endDateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        editPanel.add(endDateLabel, gbc);
+
+        JDateChooser endDateChooser = new JDateChooser(endDate);
+        endDateChooser.setPreferredSize(new Dimension(200, 25));
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        editPanel.add(endDateChooser, gbc);
+
+        // Thêm nút "Lưu"
+        JButton saveButton = new JButton("Lưu");
+        saveButton.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        editPanel.add(saveButton, gbc);
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Lấy dữ liệu từ các trường nhập liệu
+                String editedProductID = productIDField.getText();
+                String editedSupplierID = supplierIDField.getText();
+                double editedPromotionRate = Double.parseDouble(promotionRateField.getText());
+                
+                // Lấy ngày tháng được chọn từ JDateChooser
+                java.util.Date startDateUtil = startDateChooser.getDate();
+                java.util.Date endDateUtil = endDateChooser.getDate();
+                
+                // Kiểm tra xem ngày tháng đã được chọn hay chưa
+                if (startDateUtil != null && endDateUtil != null) {
+                    // Chuyển đổi sang kiểu java.sql.Date
+                    java.sql.Date startDate = new java.sql.Date(startDateUtil.getTime());
+                    java.sql.Date endDate = new java.sql.Date(endDateUtil.getTime());
+                    
+                    // Tạo đối tượng Promotion từ dữ liệu nhập liệu
+                    Promotion editedPromotions = new Promotion(editedProductID, editedSupplierID, editedPromotionRate, startDate, endDate);
+
+                    // Thêm sản phẩm chỉnh sửa vào danh sách editedProducts
+                    editedPromotion.add(editedPromotions);
+                    
+                    // Cập nhật dữ liệu tại dòng chỉnh sửa trong bảng
+                    table.setValueAt(editedProductID, row, 0);
+                    table.setValueAt(editedSupplierID, row, 1);
+                    table.setValueAt(editedPromotionRate, row, 2);
+                    table.setValueAt(startDate, row, 3);
+                    table.setValueAt(endDate, row, 4);
+                }
+                
+                // Đóng cửa sổ nổi sau khi lưu
+                editFrame.dispose();
+            }
+        });
+
+        // Đặt cấu hình cho cửa sổ nổi và hiển thị nó
+        editFrame.getContentPane().add(editPanel);
+        editFrame.pack();
+        editFrame.setLocationRelativeTo(null); // Hiển thị cửa sổ ở giữa màn hình
+        editFrame.setVisible(true);
     }
 }
