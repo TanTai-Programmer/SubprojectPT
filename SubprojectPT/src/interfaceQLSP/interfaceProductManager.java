@@ -36,7 +36,7 @@ public interface interfaceProductManager extends Remote {
     // Chức năng Xóa
     // Kiểu dữ liệu String vì id nhập vào không phải số nguyên vd: sp00001
     public void deleteProduct(String productID) throws RemoteException;
-    void deletePromotion(String productID, String supplierID) throws RemoteException;
+    public void deletePromotion(String productID, String supplierID, String promotionRate, String startDateString, String endDateString) throws RemoteException;
     public void deleteSupplier(String supplierID) throws RemoteException;
     
     // Chức năng Tìm kiếm

@@ -134,7 +134,14 @@ public class ProductPanel extends JPanel {
         // Panel con 2
         leftSubPanel2 = new JPanel();
         leftSubPanel2.setLayout(new BorderLayout()); // Sử dụng BorderLayout
-        displayProductTable(leftSubPanel2); // Tạo bảng và thêm vào leftSubPanel2
+        try {
+			productResult = productManager.getProducts();
+			updateTable(productResult, leftSubPanel2);
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
         
         GridBagConstraints gbcLeftSubPanel2 = new GridBagConstraints();
         gbcLeftSubPanel2.gridx = 0;
@@ -159,6 +166,7 @@ public class ProductPanel extends JPanel {
                 	
                     productManager.updateProduct(editedProduct);
                     productResult =   productManager.getProducts();
+                    updateTable(productResult, leftSubPanel2);
                 } catch (RemoteException ex) {
                     ex.printStackTrace();
                 }
@@ -436,6 +444,7 @@ public class ProductPanel extends JPanel {
             }
         });
 
+
         GridBagConstraints gbcRightPanel = new GridBagConstraints();
         gbcRightPanel.gridx = 1;
         gbcRightPanel.gridy = 0;
@@ -449,88 +458,6 @@ public class ProductPanel extends JPanel {
     public Dimension getPreferredSize() {
         return new Dimension(800, 600); // Kích thước mặc định
     }
-    
-    
-    // Phương thức để tạo và điền dữ liệu vào bảng
-    private void displayProductTable(JPanel panel) {
-        // Lấy dữ liệu từ đối tượng phân tán
-        try {
-            productResult = productManager.getProducts();
-        } catch (RemoteException e) {
-            e.printStackTrace(); // Xử lý ngoại lệ nếu cần thiết
-            return;
-        }
-
-        // Chuyển đổi dữ liệu thành mảng 2 chiều
-        String[][] data = new String[productResult.size()][6];
-        for (int i = 0; i < productResult.size(); i++) {
-            Product product = productResult.get(i);
-            data[i][0] = product.getProductID();
-            data[i][1] = product.getProductName();
-            data[i][2] = String.valueOf(product.getPrice());
-            data[i][3] = String.valueOf(product.getQuantity());
-            data[i][4] = product.getDescription();
-            data[i][5] = product.getSupplierID();
-        }
-
-        // Tiêu đề cột
-        String[] columnNames = {"Product ID", "Product Name", "Price", "Quantity", "Description", "Supplier ID"};
-
-        // Tạo bảng hiển thị dữ liệu
-        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			@Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Không cho phép chỉnh sửa trực tiếp
-            }
-        };
-        table = new JTable(model);
-        table.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
-        JScrollPane scrollPaneTable = new JScrollPane(table);
-        scrollPaneTable.setViewportBorder(null);
-        panel.add(scrollPaneTable, BorderLayout.CENTER); // Thêm scrollPane vào vị trí CENTER của panel
-
-        // Customize header
-        JTableHeader header = table.getTableHeader();
-        header.setBackground(Color.BLUE); // Set header background color
-        header.setForeground(Color.WHITE); // Set header text color
-
-        // Get the current font
-        Font currentFont = header.getFont();
-        // Derive a new font with size 18 and bold style
-        Font newFont = currentFont.deriveFont(Font.BOLD, 18f);
-        // Set the new font for the header
-        header.setFont(newFont);
-
-        // Sự kiện lắng nghe cho bảng
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // Kiểm tra xem người dùng đã nhấn đúp chuột hay chưa
-                if (e.getClickCount() == 2) {
-                    // Lấy chỉ số hàng của dòng được chọn
-                    int row = table.getSelectedRow();
-                    // Lấy dữ liệu từ mô hình bảng
-                    TableModel model = table.getModel();
-                    // Lấy dữ liệu từ các cột của dòng được chọn
-                    String productID = model.getValueAt(row, 0).toString();
-                    String productName = model.getValueAt(row, 1).toString();
-                    String price = model.getValueAt(row, 2).toString();
-                    String quantity = model.getValueAt(row, 3).toString();
-                    String description = model.getValueAt(row, 4).toString();
-                    String supplierID = model.getValueAt(row, 5).toString();
-                    // Hiển thị cửa sổ nổi để chỉnh sửa thông tin
-                    showEditWindow(productID, productName, price, quantity, description, supplierID, row);
-                }
-            }
-        });
-    }
-
     private void updateProductTable() {
         try {
             // Lấy danh sách sản phẩm từ ProductManager

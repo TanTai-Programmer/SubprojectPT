@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,19 +39,20 @@ public class QueryProcessingDB {
         }
     }
     public void addPromotion(Promotion promotion) {
-        String query = "INSERT INTO promotion (productid, supplierid, promotionrate, startdate, enddate) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO promotion (productid, supplierid, promotionrate, startdate, enddate, createddate) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, promotion.getProductID());
             statement.setString(2, promotion.getSupplierID());
             statement.setDouble(3, promotion.getPromotionRate());
-            statement.setTimestamp(4, new java.sql.Timestamp(promotion.getStartDate().getTime()));
-            statement.setTimestamp(5, new java.sql.Timestamp(promotion.getEndDate().getTime()));
-
+            statement.setDate(4, new java.sql.Date(promotion.getStartDate().getTime()));
+            statement.setDate(5, new java.sql.Date(promotion.getEndDate().getTime()));
+            statement.setString(6, promotion.getCreatedDate()); 
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     public void addSupplier(SupplierSP supplier) {
         String query = "INSERT INTO supplier (supplierid, suppliername, address, phonenumber) VALUES (?, ?, ?, ?)";
@@ -81,19 +83,21 @@ public class QueryProcessingDB {
         }
     }
     public void updatePromotion(Promotion promotion) {
-        String query = "UPDATE promotion SET productid = ?, supplierid = ?, promotionrate = ?, startdate = ?, enddate = ? WHERE productid = ?";
+        String query = "UPDATE promotion SET supplierid = ?, promotionrate = ?, startdate = ?, enddate = ?, createddate = ? WHERE productid = ? AND createddate = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, promotion.getProductID());
-            statement.setString(2, promotion.getSupplierID());
-            statement.setDouble(3, promotion.getPromotionRate());
-            statement.setDate(4, new java.sql.Date(promotion.getStartDate().getTime()));
-            statement.setDate(5, new java.sql.Date(promotion.getEndDate().getTime()));
-            statement.setString(6, promotion.getProductID());
+            statement.setString(1, promotion.getSupplierID());
+            statement.setDouble(2, promotion.getPromotionRate());
+            statement.setDate(3, new java.sql.Date(promotion.getStartDate().getTime()));
+            statement.setDate(4, new java.sql.Date(promotion.getEndDate().getTime()));
+            statement.setString(5, promotion.getCreatedDate()); // Sử dụng createdDate cho cập nhật
+            statement.setString(6, promotion.getProductID()); // Sử dụng productID để xác định dòng cần cập nhật
+            statement.setString(7, promotion.getCreatedDate()); // Thêm điều kiện createdDate cho cập nhật
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     public void updateSupplier(SupplierSP supplier) {
         String query = "UPDATE supplier SET suppliername = ?, address = ?, phonenumber = ? WHERE supplierid = ?";
@@ -119,16 +123,20 @@ public class QueryProcessingDB {
             e.printStackTrace();
         }
     }
-    public void deletePromotion(String productID, String supplierID) {
-        String query = "DELETE FROM promotion WHERE productid = ? AND supplierid = ?";
+    public void deletePromotion(String productID, String supplierID, String promotionRate, String startDate, String endDate) {
+        String query = "DELETE FROM promotion WHERE productid = ? AND supplierid = ? AND promotionrate = ? AND startdate = ? AND enddate = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, productID);
             statement.setString(2, supplierID);
+            statement.setDouble(3, Double.parseDouble(promotionRate));
+            statement.setDate(4, java.sql.Date.valueOf(startDate));
+            statement.setDate(5, java.sql.Date.valueOf(endDate));
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     public void deleteSupplier(String supplierID) {
         String query = "DELETE FROM supplier WHERE supplierid = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -164,9 +172,13 @@ public class QueryProcessingDB {
     }
     public List<Promotion> searchPromotions(String keyword) {
         List<Promotion> promotions = new ArrayList<>();
-        String query = "SELECT * FROM promotion WHERE productid LIKE ?";
+        String query = "SELECT * FROM promotion WHERE productid LIKE ? OR supplierid LIKE ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, "%" + keyword + "%");
+            // Gán giá trị cho tham số 1 và tham số 2 của truy vấn SQL
+            String keywordPattern = "%" + keyword + "%";
+            statement.setString(1, keywordPattern);
+            statement.setString(2, keywordPattern);
+            
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 String productID = resultSet.getString("productid");
@@ -174,7 +186,8 @@ public class QueryProcessingDB {
                 double promotionRate = resultSet.getDouble("promotionrate");
                 Date startDate = resultSet.getDate("startdate");
                 Date endDate = resultSet.getDate("enddate");
-                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+                String createdDate = resultSet.getString("createddate"); // Lấy giá trị của cột createddate
+                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate, createdDate);
                 promotions.add(promotion);
             }
         } catch (SQLException e) {
@@ -182,6 +195,7 @@ public class QueryProcessingDB {
         }
         return promotions;
     }
+
 
     public List<SupplierSP> searchSuppliers(String keyword) {
         List<SupplierSP> suppliers = new ArrayList<>();
@@ -233,7 +247,8 @@ public class QueryProcessingDB {
                 double promotionRate = resultSet.getDouble("promotionrate");
                 Date startDate = resultSet.getDate("startdate");
                 Date endDate = resultSet.getDate("enddate");
-                promotions.add(new Promotion(productID, supplierID, promotionRate, startDate, endDate));
+                String createdDate = resultSet.getString("createddate");
+                promotions.add(new Promotion(productID, supplierID, promotionRate, startDate, endDate, createdDate));
             }
         } catch (SQLException e) {
             e.printStackTrace();
