@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 import databaseQLSP.DatabaseConnection;
@@ -202,4 +203,15 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	public List<Promotion> sortPromotionDateAscending(List<Promotion> productList) throws RemoteException {
 		return queryProcessor.sortPromotionDateAscending(productList);
 	}
+	
+	@Override
+	public String getSupplierID(String productID) throws RemoteException{
+		 return queryProcessor.getSupplierID(productID);
+	 }
+
+	@Override
+	public boolean isPromotionOverlap(String productID, Date startDate, Date endDate) throws RemoteException {
+		return queryProcessor.isPromotionOverlap(productID, startDate, endDate);
+	}
+	
 }

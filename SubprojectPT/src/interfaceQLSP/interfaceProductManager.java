@@ -2,6 +2,7 @@ package interfaceQLSP;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Date;
 import java.util.List;
 
 import objectQLSP.Invoice;
@@ -18,6 +19,8 @@ public interface interfaceProductManager extends Remote {
     // Tạo hóa đơn
     boolean createInvoice(List<String> productIds, List<Integer> quantities) throws RemoteException;
     // Chức năng Đọc
+    public String getSupplierID(String productID) throws RemoteException;
+    
     public List<Product> getProducts() throws RemoteException;
     
     public List<InvoiceDetail> getInvoiceDetails() throws RemoteException;
@@ -62,4 +65,6 @@ public interface interfaceProductManager extends Remote {
     // Chức năng sắp xếp hóa đơn theo đơn giá
     public List<Invoice> sortInvoicePriceASC() throws RemoteException;
     public List<Invoice> sortInvoicePriceDESC() throws RemoteException;
+    //Kiểm tra khoảng thời gian khuyến mãi 
+    boolean isPromotionOverlap(String productID, Date startDate, Date endDate) throws RemoteException;
 }

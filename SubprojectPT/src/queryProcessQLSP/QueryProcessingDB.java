@@ -536,4 +536,46 @@ public class QueryProcessingDB {
         }
         return invoices;
     }
+    public String getSupplierID(String productID) {
+    	String supplierID = null;
+        // Truy vấn CSDL để lấy ID nhà cung cấp tương ứng với productID
+        String query = "SELECT supplierid FROM product WHERE productid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, productID);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                supplierID = resultSet.getString("supplierID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return supplierID;
+    }
+    public boolean isPromotionOverlap(String productID, Date startDate, Date endDate) {
+        try {
+            // Tạo câu truy vấn SQL để kiểm tra sự trùng lặp
+            String query = "SELECT COUNT(*) FROM promotion WHERE productid = ? AND ((startdate <= ? AND enddate >= ?) OR (startdate <= ? AND enddate >= ?) OR (startdate >= ? AND enddate <= ?))";
+            
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, productID);
+                statement.setDate(2, new java.sql.Date(startDate.getTime()));
+                statement.setDate(3, new java.sql.Date(startDate.getTime()));
+                statement.setDate(4, new java.sql.Date(endDate.getTime()));
+                statement.setDate(5, new java.sql.Date(endDate.getTime()));
+                statement.setDate(6, new java.sql.Date(startDate.getTime()));
+                statement.setDate(7, new java.sql.Date(endDate.getTime()));
+                
+                try (ResultSet resultSet = statement.executeQuery()) {
+                    if (resultSet.next()) {
+                        int count = resultSet.getInt(1);
+                        return count > 0;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

@@ -403,29 +403,37 @@ public class ProductPanel extends JPanel {
             // Lấy thông tin từ các trường nhập
             String productID = productIDField.getText();
             String productName = productNameField.getText();
-            double price = Double.parseDouble(priceField.getText());
-            int quantity = Integer.parseInt(quantityField.getText());
+            String priceText = priceField.getText();
+            String quantityText = quantityField.getText();
             String description = descriptionArea.getText();
             String supplierID = supplierIDField.getText();
             
-            // Tạo đối tượng Product từ thông tin đã nhập
-            Product product = new Product(productID, productName, price, quantity, description, supplierID);
-            
-            // Gọi phương thức addProduct của ProductPanel
+            // Kiểm tra xem các trường nhập liệu có được nhập đầy đủ không
+            if (productID.isEmpty() || productName.isEmpty() || priceText.isEmpty() || quantityText.isEmpty() || description.isEmpty() || supplierID.isEmpty()) {
+                // Hiển thị thông báo nếu thiếu trường nào đó
+                JOptionPane.showMessageDialog(null, "Vui lòng điền đầy đủ thông tin.");
+                return; // Dừng việc thực hiện thêm sản phẩm nếu có trường nhập liệu thiếu
+            }
+
+            // Tiến hành thêm sản phẩm nếu các trường nhập liệu đầy đủ
             try {
-				productManager.addProduct(product);
-				updateProductTable();
-				 // Xóa dữ liệu từ các trường nhập
-		        productIDField.setText("");
-		        productNameField.setText("");
-		        priceField.setText("");
-		        quantityField.setText("");
-		        descriptionArea.setText("");
-		        supplierIDField.setText("");
-			} catch (RemoteException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+                double price = Double.parseDouble(priceText);
+                int quantity = Integer.parseInt(quantityText);
+                Product product = new Product(productID, productName, price, quantity, description, supplierID);
+                productManager.addProduct(product);
+                updateProductTable();
+                // Xóa dữ liệu từ các trường nhập
+                productIDField.setText("");
+                productNameField.setText("");
+                priceField.setText("");
+                quantityField.setText("");
+                descriptionArea.setText("");
+                supplierIDField.setText("");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Vui lòng nhập giá trị số hợp lệ cho giá và số lượng.");
+            } catch (RemoteException ex) {
+                ex.printStackTrace();
+            }
         });
 
         GridBagConstraints gbcRightPanel = new GridBagConstraints();

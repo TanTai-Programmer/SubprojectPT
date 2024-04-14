@@ -14,6 +14,8 @@ import objectQLSP.Promotion;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
@@ -130,7 +132,14 @@ public class PromotionPanel extends JPanel {
         // Panel con 2
         leftSubPanel2 = new JPanel();
         leftSubPanel2.setLayout(new BorderLayout()); // Sử dụng BorderLayout
-        displayPromotionTable(leftSubPanel2);
+        try {
+			promotionResult = productManager.getPromotions();
+			updateTable(promotionResult, leftSubPanel2);
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
         
         GridBagConstraints gbcLeftSubPanel2 = new GridBagConstraints();
         gbcLeftSubPanel2.gridx = 0;
@@ -152,7 +161,9 @@ public class PromotionPanel extends JPanel {
             for (Promotion editedPromotions : editedPromotion) {
                 // Cập nhật thông tin của đối tượng Promotion lên server từ xa
                 try {
+                	
                     productManager.updatePromotion(editedPromotions);
+                    promotionResult = productManager.getPromotions();
                     updateTable(promotionResult,leftSubPanel2);
                 } catch (RemoteException ex) {
                     ex.printStackTrace();
@@ -268,6 +279,7 @@ public class PromotionPanel extends JPanel {
         JLabel supplierIDLabel = new JLabel("Supplier ID:");
         supplierIDLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
         JTextField supplierIDField = new JTextField(20); // Số ký tự mặc định
+        supplierIDField.setEditable(false);
         supplierIDField.setFont(new Font("Tahoma", Font.PLAIN, 16));
         supplierIDField.setPreferredSize(new Dimension(200, 25)); // Kích thước cụ thể
         GridBagConstraints gbcSupplierIDLabel = new GridBagConstraints();
@@ -284,6 +296,27 @@ public class PromotionPanel extends JPanel {
         gbcSupplierIDField.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
         rightSubPanel2.add(supplierIDField, gbcSupplierIDField);
 
+        // Lấy ra mã nhà cung cấp và gán vào jtextfield supplierIDField
+        productIDField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String productID = productIDField.getText();
+                try {
+                    String supplierID = productManager.getSupplierID(productID);
+                    if (supplierID != null) {
+                        supplierIDField.setText(supplierID);
+                    } else {
+                    	  // Hiển thị thông báo khi kết quả trả về null
+                        JOptionPane.showMessageDialog(null, "Mã sản phẩm sai hoặc Không tìm thấy nhà cung cấp tương ứng với mã sản phẩm của bạn!");
+                        supplierIDField.setText("");
+                    }
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        
         // Label và TextField cho Phần trăm khuyến mãi
         JLabel promotionRateLabel = new JLabel("Tỉ lệ khuyến mãi:");
         promotionRateLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
@@ -367,19 +400,30 @@ public class PromotionPanel extends JPanel {
                 // Lấy dữ liệu từ các trường nhập liệu
                 String productID = productIDField.getText();
                 String supplierID = supplierIDField.getText();
-                double promotionRate = Double.parseDouble(promotionRateField.getText());
-             // Lấy ngày tháng được chọn từ JDateChooser
+                String promotionRateText = promotionRateField.getText();
                 java.util.Date startDateUtil = startDateChooser.getDate();
                 java.util.Date endDateUtil = endDateChooser.getDate();
 
-                // Chuyển đổi sang kiểu java.sql.Date
-                java.sql.Date startDate = new java.sql.Date(startDateUtil.getTime());
-                java.sql.Date endDate = new java.sql.Date(endDateUtil.getTime());
-                // Tạo đối tượng Promotion từ dữ liệu nhập liệu
-                Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
+                // Kiểm tra xem các trường nhập liệu có được nhập đầy đủ không
+                if (productID.isEmpty() || supplierID.isEmpty() || promotionRateText.isEmpty() || startDateUtil == null || endDateUtil == null) {
+                    // Hiển thị thông báo nếu thiếu trường nào đó
+                    JOptionPane.showMessageDialog(null, "Vui lòng điền đầy đủ thông tin.");
+                    return; // Dừng việc thực hiện thêm promotion nếu có trường nhập liệu thiếu
+                }
 
-                // Gọi phương thức addPromotion với đối tượng Promotion được tạo
+                // Tiến hành thêm promotion nếu các trường nhập liệu đầy đủ
                 try {
+                	
+                    double promotionRate = Double.parseDouble(promotionRateText);
+                    java.sql.Date startDate = new java.sql.Date(startDateUtil.getTime());
+                    java.sql.Date endDate = new java.sql.Date(endDateUtil.getTime());
+                    
+                 // Kiểm tra xem có sự trùng lặp với khuyến mãi hiện có không
+                    if (productManager.isPromotionOverlap(productID, startDate, endDate)) {
+                        JOptionPane.showMessageDialog(null, "Khuyến mãi cho sản phẩm này đã tồn tại trong khoảng thời gian bạn đã chọn.");
+                        return; // Dừng việc thực hiện thêm khuyến mãi nếu có sự trùng lặp
+                    }
+                    Promotion promotion = new Promotion(productID, supplierID, promotionRate, startDate, endDate);
                     productManager.addPromotion(promotion);
                     updatePromotionTable();
                     // Xóa dữ liệu trong các trường nhập liệu sau khi thêm promotion thành công
@@ -388,8 +432,10 @@ public class PromotionPanel extends JPanel {
                     promotionRateField.setText("");
                     startDateChooser.setDate(null);
                     endDateChooser.setDate(null);
-                } catch (RemoteException e1) {
-                    e1.printStackTrace();
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng nhập giá trị số hợp lệ cho tỷ lệ khuyến mãi.");
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
                 }
             }
         });
@@ -546,7 +592,7 @@ public class PromotionPanel extends JPanel {
                 return false; // Không cho phép chỉnh sửa trực tiếp
             }
         };
-        JTable table = new JTable(model);
+        table = new JTable(model);
         table.setFont(new Font("Tahoma", Font.PLAIN, 16));
         table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
         JScrollPane scrollPaneTable = new JScrollPane(table);
