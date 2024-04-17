@@ -7,10 +7,8 @@ import javax.swing.table.TableModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import interfaceQLSP.interfaceProductManager;
-import objectQLSP.Product;
 import objectQLSP.SupplierSP;
 
 import java.awt.*;
@@ -29,6 +27,7 @@ public class SupplierPanel extends JPanel {
 	    private interfaceProductManager supplierManager;
 	    private List<SupplierSP> supplierResult;
 	    private  List<SupplierSP> editedSuppliers = new ArrayList<>();
+	    private boolean dataModified = false;
 
 	    public SupplierPanel(interfaceProductManager supplierManager){
 	    	this.supplierManager = supplierManager;
@@ -77,6 +76,7 @@ public class SupplierPanel extends JPanel {
         	 // Lấy từ khóa tìm kiếm từ TextField
             String keyword = searchField.getText(); 
 			try {
+				handleOtherAction();
 				supplierResult = supplierManager.searchSuppliers(keyword);
 		           // Cập nhật bảng hiển thị dữ liệu với kết quả tìm kiếm
 	            updateTable(supplierResult, leftSubPanel2);
@@ -85,46 +85,6 @@ public class SupplierPanel extends JPanel {
 				e1.printStackTrace();
 			}
         });
-        // ComboBox có 4 tùy chọn
-//        String[] options = {"Giá tăng dần", "Giá giảm dần", "Số lượng tăng dần", "Số lượng giảm dần"};
-//        JComboBox<String> comboBox = new JComboBox<>(options);
-//        comboBox.setFont(new Font("Tahoma", Font.PLAIN, 16));
-//
-//        comboBox.addActionListener(e -> {
-//            String selectedOption = (String) comboBox.getSelectedItem();
-//            try {
-//				if (selectedOption.equals("Giá tăng dần")) {
-//                    List<Product> sortedProducts = productManager.sortProductsByPriceAscending(productResult);
-//                    // Gọi phương thức để sử dụng sortedProducts
-//                    updateTable(sortedProducts,leftSubPanel2);
-//                } else if (selectedOption.equals("Giá giảm dần")) {
-//                    List<Product> sortedProducts = productManager.sortProductsByPriceDescending(productResult);
-//                    // Gọi phương thức để sử dụng sortedProducts
-//                    updateTable(sortedProducts,leftSubPanel2);
-//                } else if (selectedOption.equals("Số lượng giảm dần")) {
-//                    List<Product> sortedProducts = productManager.sortProductsByQuantityAscending(productResult);
-//                    // Gọi phương thức để sử dụng sortedProducts
-//                    updateTable(sortedProducts,leftSubPanel2);
-//                }else if (selectedOption.equals("Số lượng tăng dần")) {
-//                    List<Product> sortedProducts = productManager.sortProductsByQuantityDescending(productResult);
-//                    // Gọi phương thức để sử dụng sortedProducts
-//                    updateTable(sortedProducts,leftSubPanel2);
-//                }
-//                // Xử lý các lựa chọn khác nếu cần
-//            } catch (RemoteException ex) {
-//                ex.printStackTrace();
-//                // Xử lý ngoại lệ nếu cần
-//            }
-//        });
-        
-//        GridBagConstraints gbcComboBox = new GridBagConstraints();
-//        gbcComboBox.gridx = 0;
-//        gbcComboBox.gridy = 1;
-//        gbcComboBox.gridwidth = 3; // Chiếm 3 cột
-//        gbcComboBox.anchor = GridBagConstraints.EAST; // Căn trái
-//        gbcComboBox.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
-//        leftSubPanel1.add(comboBox, gbcComboBox);
-
         leftPanel.add(leftSubPanel1);
 
         GridBagConstraints gbcLeftSubPanel1 = new GridBagConstraints();
@@ -138,7 +98,13 @@ public class SupplierPanel extends JPanel {
         // Panel con 2
         leftSubPanel2 = new JPanel();
         leftSubPanel2.setLayout(new BorderLayout()); // Sử dụng BorderLayout
-        displayProductTable(leftSubPanel2); // Tạo bảng và thêm vào leftSubPanel2
+        try {
+			supplierResult = supplierManager.getSuppliers();
+			updateTable(supplierResult, leftSubPanel2);
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         
         GridBagConstraints gbcLeftSubPanel2 = new GridBagConstraints();
         gbcLeftSubPanel2.gridx = 0;
@@ -182,7 +148,7 @@ public class SupplierPanel extends JPanel {
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
                 // Kiểm tra xem người dùng đã chọn một dòng trong bảng chưa
-                JOptionPane.showMessageDialog(null, "Vui lòng chọn một sản phẩm để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Vui lòng chọn một nhà cung cấp để xóa.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -191,17 +157,18 @@ public class SupplierPanel extends JPanel {
 
             // Gọi phương thức deleteProduct từ xa với ID của sản phẩm
             try {
+            	handleOtherAction();
                 supplierManager.deleteSupplier(supplierID);
                 // Xóa sản phẩm từ bảng dữ liệu
                 DefaultTableModel model = (DefaultTableModel) table.getModel();
                 model.removeRow(selectedRow); // Xóa dòng tương ứng từ bảng
 
                 // Hiển thị thông báo thành công (nếu cần)
-                JOptionPane.showMessageDialog(null, "Đã xóa sản phẩm thành công.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Đã xóa nhà cung cấp thành công.", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             } catch (RemoteException ex) {
                 ex.printStackTrace();
                 // Xử lý ngoại lệ khi gặp lỗi khi gọi phương thức từ xa
-                JOptionPane.showMessageDialog(null, "Lỗi khi xóa sản phẩm.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Lỗi khi xóa nhà cung cấp.", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -230,7 +197,7 @@ public class SupplierPanel extends JPanel {
         JPanel rightSubPanel1 = new JPanel();
         rightSubPanel1.setLayout(new GridBagLayout()); // Sử dụng GridBagLayout
 
-        // Label "Nhập thông tin sản phẩm"
+        // Label "Nhập thông tin nhà cung cấp"
         JLabel label = new JLabel("Nhập thông tin nhà cung cấp");
         label.setForeground(new Color(0, 128, 255));
         label.setFont(new Font("Tahoma", Font.BOLD, 20));
@@ -332,15 +299,6 @@ public class SupplierPanel extends JPanel {
         gbcPhoneNumberField.weightx = 1.0; // Độ rộng linh hoạt
         gbcPhoneNumberField.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
         rightSubPanel2.add(PhoneNumberField, gbcPhoneNumberField);
-        JScrollPane scrollPane = new JScrollPane();
-        GridBagConstraints gbcScrollPane = new GridBagConstraints();
-        gbcScrollPane.gridx = 1;
-        gbcScrollPane.gridy = 4;
-        gbcScrollPane.fill = GridBagConstraints.BOTH; // Giãn theo cả chiều ngang và chiều dọc
-        gbcScrollPane.weightx = 1.0; // Độ rộng linh hoạt
-        gbcScrollPane.weighty = 1.0; // Độ cao linh hoạt
-        gbcScrollPane.insets = new Insets(5, 5, 5, 10); // Khoảng cách giữa các thành phần
-        rightSubPanel2.add(scrollPane, gbcScrollPane);
 
         GridBagConstraints gbcRightSubPanel2 = new GridBagConstraints();
         gbcRightSubPanel2.gridx = 0;
@@ -376,11 +334,19 @@ public class SupplierPanel extends JPanel {
 			String address = addressField.getText();
             String PhoneNumber = PhoneNumberField.getText();
             
+
+            // Kiểm tra xem các trường nhập liệu có được nhập đầy đủ không
+            if (supplierID.isEmpty() || supplierName.isEmpty() || address.isEmpty() || PhoneNumber.isEmpty()) {
+                // Hiển thị thông báo nếu thiếu trường nào đó
+                JOptionPane.showMessageDialog(null, "Vui lòng điền đầy đủ thông tin.");
+                return;
+            }
             // Tạo đối tượng Supplier từ thông tin đã nhập
             SupplierSP supplier = new SupplierSP(supplierID, supplierName, address, PhoneNumber);
             
             // Gọi phương thức addsupplier của supplierPanel
             try {
+            	handleOtherAction();
 				supplierManager.addSupplier(supplier);
 				updateSupplierTable();
 				 // Xóa dữ liệu từ các trường nhập
@@ -403,102 +369,11 @@ public class SupplierPanel extends JPanel {
         add(rightPanel, gbcRightPanel);
     }
 
-    private void updateSupplierTable() {
-			// TODO Auto-generated method stub
-			
-		}
-
 	@Override
     public Dimension getPreferredSize() {
         return new Dimension(800, 600); // Kích thước mặc định
     }
-    
-    
-    // Phương thức để tạo và điền dữ liệu vào bảng
-    private void displayProductTable(JPanel panel) {
-        // Lấy dữ liệu từ đối tượng phân tán
-        try {
-            supplierResult = supplierManager.getSuppliers();
-        } catch (RemoteException e) {
-            e.printStackTrace(); // Xử lý ngoại lệ nếu cần thiết
-            return;
-        }
-
-        // Chuyển đổi dữ liệu thành mảng 2 chiều
-        String[][] data = new String[supplierResult.size()][6];
-        for (int i = 0; i < supplierResult.size(); i++) {
-            SupplierSP supplier = supplierResult.get(i);
-            data[i][0] = supplier.getSupplierID();
-            data[i][1] = supplier.getSupplierName();
-            data[i][2] = supplier.getAddress();
-            data[i][3] = String.valueOf(supplier.getPhoneNumber());
-            
-        }
-
-        // Tiêu đề cột
-        String[] columnNames = {"Supplier ID", "Supplier Name", "Address", "Phone Number"};
-
-        // Tạo bảng hiển thị dữ liệu
-        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
-            /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			@Override
-            public boolean isCellEditable(int row, int column) {
-                return false; // Không cho phép chỉnh sửa trực tiếp
-            }
-        };
-        table = new JTable(new DefaultTableModel(
-        	new Object[][] {
-        	},
-        	new String[] {
-        		"Supplier ID", "Supplier Name", "Address", "Phone Number"
-        	}
-        ));
-        table.setFont(new Font("Tahoma", Font.PLAIN, 16));
-        table.setFillsViewportHeight(true); // Đảm bảo bảng lấp đầy kích thước của JScrollPane
-        JScrollPane scrollPaneTable = new JScrollPane(table);
-        scrollPaneTable.setViewportBorder(null);
-        panel.add(scrollPaneTable, BorderLayout.CENTER); // Thêm scrollPane vào vị trí CENTER của panel
-
-        // Customize header
-        JTableHeader header = table.getTableHeader();
-        header.setBackground(Color.BLUE); // Set header background color
-        header.setForeground(Color.WHITE); // Set header text color
-
-        // Get the current font
-        Font currentFont = header.getFont();
-        // Derive a new font with size 18 and bold style
-        Font newFont = currentFont.deriveFont(Font.BOLD, 18f);
-        // Set the new font for the header
-        header.setFont(newFont);
-
-        // Sự kiện lắng nghe cho bảng
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // Kiểm tra xem người dùng đã nhấn đúp chuột hay chưa
-                if (e.getClickCount() == 2) {
-                    // Lấy chỉ số hàng của dòng được chọn
-                    int row = table.getSelectedRow();
-                    // Lấy dữ liệu từ mô hình bảng
-                    TableModel model = table.getModel();
-                    // Lấy dữ liệu từ các cột của dòng được chọn
-                    String supplierID = model.getValueAt(row, 0).toString();
-                    String supplierName = model.getValueAt(row, 1).toString();
-                    String address = model.getValueAt(row, 2).toString();
-                    String PhoneNumber = model.getValueAt(row, 3).toString();
-                    
-                    // Hiển thị cửa sổ nổi để chỉnh sửa thông tin
-                    showEditWindow(supplierID, supplierName, address, PhoneNumber, row);
-                }
-            }
-        });
-    }
-
-    private void updateProductTable() {
+    private void updateSupplierTable() {
         try {
             // Lấy danh sách sản phẩm từ ProductManager
              supplierResult = supplierManager.getSuppliers();
@@ -668,7 +543,7 @@ public class SupplierPanel extends JPanel {
             table.setValueAt(editedSupplierName, row, 1);
             table.setValueAt(editedAddress, row, 2);
             table.setValueAt(editedPhoneNumber, row, 3);
-            
+            dataModified = true;
 
             // Đóng cửa sổ nổi sau khi lưu
             editFrame.dispose();
@@ -681,5 +556,27 @@ public class SupplierPanel extends JPanel {
         editFrame.setLocationRelativeTo(null); // Hiển thị cửa sổ ở giữa màn hình
         editFrame.setVisible(true);
     }
-
+    private void handleOtherAction() {
+        if (dataModified) {
+            int choice = JOptionPane.showConfirmDialog(null, "Bạn chưa cập nhật dữ liệu. Bạn có muốn cập nhật", "Cảnh báo", JOptionPane.YES_NO_OPTION);
+            if (choice == JOptionPane.YES_OPTION) {
+            	for (SupplierSP editedSupplier : editedSuppliers) {
+                    // Cập nhật thông tin của đối tượng Promotion lên server từ xa
+                    try {
+                    	
+                    	supplierManager.updateSupplier(editedSupplier);
+                        supplierResult = supplierManager.getSuppliers();
+                        updateTable(supplierResult,leftSubPanel2);
+                        dataModified = false;
+                    } catch (RemoteException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }else {
+            	editedSuppliers.clear();
+            	dataModified = false;
+            }
+        }
+        // Thực hiện các thao tác khác ở đây
+    }
 }

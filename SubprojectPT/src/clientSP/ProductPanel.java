@@ -26,6 +26,7 @@ public class ProductPanel extends JPanel {
 	    private interfaceProductManager productManager;
 	    private List<Product> productResult;
 	    private  List<Product> editedProducts = new ArrayList<>();
+	    private boolean dataModified = false;
 
 	    public ProductPanel(interfaceProductManager productManager){
 	    	this.productManager = productManager;
@@ -73,7 +74,9 @@ public class ProductPanel extends JPanel {
         searchButton.addActionListener(e -> {
         	 // Lấy từ khóa tìm kiếm từ TextField
             String keyword = searchField.getText(); 
+            
 			try {
+				handleOtherAction();
 				productResult = productManager.searchProducts(keyword);
 		           // Cập nhật bảng hiển thị dữ liệu với kết quả tìm kiếm
 	            updateTable(productResult, leftSubPanel2);
@@ -90,18 +93,22 @@ public class ProductPanel extends JPanel {
             String selectedOption = (String) comboBox.getSelectedItem();
             try {
 				if (selectedOption.equals("Giá tăng dần")) {
+					handleOtherAction();
                     List<Product> sortedProducts = productManager.sortProductsByPriceAscending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 } else if (selectedOption.equals("Giá giảm dần")) {
+                	handleOtherAction();
                     List<Product> sortedProducts = productManager.sortProductsByPriceDescending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 } else if (selectedOption.equals("Số lượng giảm dần")) {
+                	handleOtherAction();
                     List<Product> sortedProducts = productManager.sortProductsByQuantityDescending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
                 }else if (selectedOption.equals("Số lượng tăng dần")) {
+                	handleOtherAction();
                     List<Product> sortedProducts = productManager.sortProductsByQuantityAscending(productResult);
                     // Gọi phương thức để sử dụng sortedProducts
                     updateTable(sortedProducts,leftSubPanel2);
@@ -196,6 +203,7 @@ public class ProductPanel extends JPanel {
 
             // Gọi phương thức deleteProduct từ xa với ID của sản phẩm
             try {
+            	handleOtherAction();
                 productManager.deleteProduct(productID);
                 // Xóa sản phẩm từ bảng dữ liệu
                 DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -428,6 +436,7 @@ public class ProductPanel extends JPanel {
                 double price = Double.parseDouble(priceText);
                 int quantity = Integer.parseInt(quantityText);
                 Product product = new Product(productID, productName, price, quantity, description, supplierID);
+                handleOtherAction();
                 productManager.addProduct(product);
                 updateProductTable();
                 // Xóa dữ liệu từ các trường nhập
@@ -655,7 +664,7 @@ public class ProductPanel extends JPanel {
             table.setValueAt(editedQuantity, row, 3);
             table.setValueAt(editedDescription, row, 4);
             table.setValueAt(editedSupplierID, row, 5);
-
+            dataModified = true;
             // Đóng cửa sổ nổi sau khi lưu
             editFrame.dispose();
         });
@@ -667,5 +676,27 @@ public class ProductPanel extends JPanel {
         editFrame.setLocationRelativeTo(null); // Hiển thị cửa sổ ở giữa màn hình
         editFrame.setVisible(true);
     }
-
+    private void handleOtherAction() {
+        if (dataModified) {
+            int choice = JOptionPane.showConfirmDialog(null, "Bạn chưa cập nhật dữ liệu. Bạn có muốn cập nhật", "Cảnh báo", JOptionPane.YES_NO_OPTION);
+            if (choice == JOptionPane.YES_OPTION) {
+            	for (Product editedProduct : editedProducts) {
+                    // Cập nhật thông tin của đối tượng Promotion lên server từ xa
+                    try {
+                    	
+                        productManager.updateProduct(editedProduct);
+                        productResult = productManager.getProducts();
+                        updateTable(productResult,leftSubPanel2);
+                        dataModified = false;
+                    } catch (RemoteException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }else {
+            	editedProducts.clear();
+            	dataModified = false;
+            }
+        }
+        // Thực hiện các thao tác khác ở đây
+    }
 }
