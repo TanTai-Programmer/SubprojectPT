@@ -213,5 +213,10 @@ public class ProductManagerImpl extends UnicastRemoteObject implements interface
 	public boolean isPromotionOverlap(String productID, Date startDate, Date endDate) throws RemoteException {
 		return queryProcessor.isPromotionOverlap(productID, startDate, endDate);
 	}
+
+	@Override
+	public List<Invoice> getInvoice() throws RemoteException {
+		return queryProcessor.getInvoice();
+	}
 	
 }

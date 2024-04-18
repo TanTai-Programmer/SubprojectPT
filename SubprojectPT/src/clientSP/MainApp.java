@@ -20,6 +20,7 @@ public class MainApp extends JFrame {
     private ProductPanel productPanel;
     private PromotionPanel promotionPanel;
     private SupplierPanel supplierPanel;
+    private InvoicePanel invoicePanel;
     // Thêm các biến tham chiếu đến các panel khác nếu cần
 
     public MainApp(interfaceProductManager productManager) {
@@ -49,6 +50,9 @@ public class MainApp extends JFrame {
         // Thêm các panel khác vào mainPanel nếu cần
         supplierPanel = new SupplierPanel(productManager);
         mainPanel.add(supplierPanel, "Panel 3");
+        
+        invoicePanel = new InvoicePanel(productManager);
+        mainPanel.add(invoicePanel, "Panel 4");
         // Thêm mainPanel vào frame
         getContentPane().add(mainPanel, BorderLayout.CENTER);
         setLocationRelativeTo(null);

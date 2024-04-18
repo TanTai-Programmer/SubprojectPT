@@ -24,7 +24,7 @@ public interface interfaceProductManager extends Remote {
     public List<Product> getProducts() throws RemoteException;
     
     public List<InvoiceDetail> getInvoiceDetails() throws RemoteException;
-
+    public List<Invoice> getInvoice() throws RemoteException;
     public List<Promotion> getPromotions() throws RemoteException;
     public List<SupplierSP> getSuppliers() throws RemoteException;
     
