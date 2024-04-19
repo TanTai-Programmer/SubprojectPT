@@ -31,13 +31,13 @@ public class PromotionPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
 		private JTable table;
 	    private JPanel leftSubPanel2;
-	    private interfaceProductManager productManager;
+	    private interfaceProductManager promotionManager;
 	    private List<Promotion> promotionResult;
 	    private  List<Promotion> editedPromotion = new ArrayList<>();
 	    private boolean dataModified = false;
 
 	    public PromotionPanel(interfaceProductManager productManager){
-	    	this.productManager = productManager;
+	    	this.promotionManager = productManager;
         setLayout(new GridBagLayout());
 
         // Phần bên trái (70%)
@@ -487,7 +487,7 @@ public class PromotionPanel extends JPanel {
     private void updatePromotionTable() {
         try {
             // Lấy danh sách khuyến mại mới nhất từ ProductManager
-            promotionResult = productManager.getPromotions();
+            promotionResult = promotionManager.getPromotions();
 
             // Cập nhật bảng hiển thị với danh sách khuyến mại mới
             updateTable(promotionResult, leftSubPanel2);
@@ -738,8 +738,8 @@ public class PromotionPanel extends JPanel {
                     // Cập nhật thông tin của đối tượng Promotion lên server từ xa
                     try {
                     	
-                        productManager.updatePromotion(editedPromotions);
-                        promotionResult = productManager.getPromotions();
+                    	promotionManager.updatePromotion(editedPromotions);
+                        promotionResult = promotionManager.getPromotions();
                         updateTable(promotionResult,leftSubPanel2);
                         dataModified = false;
                     } catch (RemoteException ex) {
