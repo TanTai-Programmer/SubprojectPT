@@ -3,7 +3,7 @@ package serverSP;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 
-public class serverRun {
+public class ServerRun {
     public static void main(String[] args) {
         try {
             // Khởi tạo ProductManagerImpl

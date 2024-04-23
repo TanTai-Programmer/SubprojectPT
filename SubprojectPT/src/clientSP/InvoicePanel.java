@@ -8,7 +8,7 @@ import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-import interfaceQLSP.interfaceProductManager;
+import interfaceQLSP.InterfaceProductManager;
 import objectQLSP.Invoice;
 import objectQLSP.InvoiceDetail;
 
@@ -24,9 +24,9 @@ public class InvoicePanel extends JPanel {
 	 */
 		private static final long serialVersionUID = 1L;
 		private JPanel leftSubPanel2;
-	    private interfaceProductManager invoiceManager;
+	    private InterfaceProductManager invoiceManager;
 	    private List<Invoice> invoiceResult;
-	    public InvoicePanel(interfaceProductManager invoiceManager){
+	    public InvoicePanel(InterfaceProductManager invoiceManager){
 	    	this.invoiceManager = invoiceManager;
         setLayout(new GridBagLayout());
 

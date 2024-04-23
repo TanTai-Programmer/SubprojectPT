@@ -3,7 +3,7 @@ package clientSP;
 import javax.swing.*;
 import java.awt.*;
 
-import interfaceQLSP.interfaceProductManager;
+import interfaceQLSP.InterfaceProductManager;
 
 
 public class MainApp extends JFrame {
@@ -16,14 +16,14 @@ public class MainApp extends JFrame {
     private static JMenuBar menuBar = new JMenuBar();
     private static JMenuItem currentMenuItem;
 
-    private interfaceProductManager productManager;
+    private InterfaceProductManager productManager;
     private ProductPanel productPanel;
     private PromotionPanel promotionPanel;
     private SupplierPanel supplierPanel;
     private InvoicePanel invoicePanel;
     // Thêm các biến tham chiếu đến các panel khác nếu cần
 
-    public MainApp(interfaceProductManager productManager) {
+    public MainApp(InterfaceProductManager productManager) {
         this.productManager = productManager;
         initializeUI();
     }

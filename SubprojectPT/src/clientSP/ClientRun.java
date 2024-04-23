@@ -2,12 +2,12 @@ package clientSP;
 
 import javax.swing.*;
 
-import interfaceQLSP.interfaceProductManager;
+import interfaceQLSP.InterfaceProductManager;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class clientRun extends JFrame {
+public class ClientRun extends JFrame {
     /**
 	 * 
 	 */
@@ -19,7 +19,7 @@ public class clientRun extends JFrame {
             Registry registry = LocateRegistry.getRegistry("localhost");
 
             // Lấy ra đối tượng từ xa từ registry
-            interfaceProductManager productManager = (interfaceProductManager) registry.lookup("ProductManager");
+            InterfaceProductManager productManager = (InterfaceProductManager) registry.lookup("ProductManager");
 
             // Tạo một instance của MainApp và truyền interfaceProductManager vào đó
             MainApp mainApp = new MainApp(productManager);

@@ -7,7 +7,7 @@ import javax.swing.table.TableModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import interfaceQLSP.interfaceProductManager;
+import interfaceQLSP.InterfaceProductManager;
 import objectQLSP.Product;
 
 import java.awt.*;
@@ -23,12 +23,12 @@ public class ProductPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
 		private JTable table;
 	    private JPanel leftSubPanel2;
-	    private interfaceProductManager productManager;
+	    private InterfaceProductManager productManager;
 	    private List<Product> productResult;
 	    private  List<Product> editedProducts = new ArrayList<>();
 	    private boolean dataModified = false;
 
-	    public ProductPanel(interfaceProductManager productManager){
+	    public ProductPanel(InterfaceProductManager productManager){
 	    	this.productManager = productManager;
         setLayout(new GridBagLayout());
 

@@ -8,7 +8,7 @@ import javax.swing.table.TableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-import interfaceQLSP.interfaceProductManager;
+import interfaceQLSP.InterfaceProductManager;
 import objectQLSP.SupplierSP;
 
 import java.awt.*;
@@ -24,12 +24,12 @@ public class SupplierPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
 		private JTable table;
 	    private JPanel leftSubPanel2;
-	    private interfaceProductManager supplierManager;
+	    private InterfaceProductManager supplierManager;
 	    private List<SupplierSP> supplierResult;
 	    private  List<SupplierSP> editedSuppliers = new ArrayList<>();
 	    private boolean dataModified = false;
 
-	    public SupplierPanel(interfaceProductManager supplierManager){
+	    public SupplierPanel(InterfaceProductManager supplierManager){
 	    	this.supplierManager = supplierManager;
         setLayout(new GridBagLayout());
 

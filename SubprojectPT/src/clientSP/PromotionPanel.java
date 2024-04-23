@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import interfaceQLSP.interfaceProductManager;
+import interfaceQLSP.InterfaceProductManager;
 import objectQLSP.Promotion;
 
 import java.awt.*;
@@ -31,12 +31,12 @@ public class PromotionPanel extends JPanel {
 		private static final long serialVersionUID = 1L;
 		private JTable table;
 	    private JPanel leftSubPanel2;
-	    private interfaceProductManager promotionManager;
+	    private InterfaceProductManager promotionManager;
 	    private List<Promotion> promotionResult;
 	    private  List<Promotion> editedPromotion = new ArrayList<>();
 	    private boolean dataModified = false;
 
-	    public PromotionPanel(interfaceProductManager productManager){
+	    public PromotionPanel(InterfaceProductManager productManager){
 	    	this.promotionManager = productManager;
         setLayout(new GridBagLayout());
 

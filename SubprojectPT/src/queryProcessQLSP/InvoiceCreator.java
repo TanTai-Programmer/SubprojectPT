@@ -7,10 +7,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class invoiceCreator {
+public class InvoiceCreator {
     private Connection connection;
 
-    public invoiceCreator(Connection connection) {
+    public InvoiceCreator(Connection connection) {
         this.connection = connection;
     }
 

@@ -11,7 +11,7 @@ import objectQLSP.Product;
 import objectQLSP.Promotion;
 import objectQLSP.SupplierSP;
 
-public interface interfaceProductManager extends Remote {
+public interface InterfaceProductManager extends Remote {
 	   // Chức năng Thêm
     public void addProduct(Product product) throws RemoteException;
     public void addPromotion(Promotion promotion) throws RemoteException;
